@@ -15,7 +15,7 @@ def signup():
         password = request.form['Password']
 
         # Connect to database
-        db = pymysql.connect(host='localhost',
+        db = pymysql.connect(host='35.200.11.18',
                              port=3306,
                              user='admin',
                              passwd='manshinee',
@@ -50,7 +50,7 @@ def login():
         password = request.form['Password']
         
         # Connect to database
-        db = pymysql.connect(host='localhost',
+        db = pymysql.connect(host='35.200.11.18',
                              port=3306,
                              user='admin',
                              passwd='manshinee',
@@ -163,4 +163,4 @@ def insert_sent(Fname, Lname, Ssn):
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run('localhost', port=5000)
+    app.run('35.200.11.18', port=5000)
