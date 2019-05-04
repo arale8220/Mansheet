@@ -7,21 +7,90 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+
+@app.route("/signup", methods = ['POST', 'GET'])
+def signup():
+    if request.method == 'POST':
+        uname = request.form['Uname']
+        password = request.form['Password']
+
+        # Connect to database
+        db = pymysql.connect(host='localhost',
+                             port=3306,
+                             user='admin',
+                             passwd='manshinee',
+                             db='mansheet',
+                             charset='utf8')
+
+        try:
+            with db.cursor() as cursor:
+                sql = """INSERT INTO MUSER
+                         VALUES('""" + Uname + """',
+                                '""" + Password + """');"""
+                cursor.execute(sql)
+            db.commit()
+            signupres = "회원가입이 성공적으로 완료되었습니다 \n환영합니다!"
+
+        except:
+            signupres = "회원가입에 실패하였습니다. \n이미 해당 닉네의 사용자가 존재합니다"
+
+        finally:
+            db.close()
+        return render_template("signupres.html", signupRes = signupres)
+
+    else :
+        return render_template('signup.html')
+
+
+
+@app.route("/login", methods = ['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        uname = request.form['Uname']
+        password = request.form['Password']
+        
+        # Connect to database
+        db = pymysql.connect(host='localhost',
+                             port=3306,
+                             user='admin',
+                             passwd='manshinee',
+                             db='mansheet',
+                             charset='utf8')
+
+        try:
+            with db.cursor() as cursor:
+                sql = """select * from MUSER where Uname like '""" + uname + """';"""
+                cursor.execute(sql)
+                row = cursor.fetchone()
+
+
+                if ((uname != row[0]) or (password != row[1])) : 
+                    signupres = "로그인에 실패하였습니다. \n아이디와 비밀번호를 다시 한번 확인해주세요...\n 지금 값은 {0}".format(row)
+            
+                else : 
+                    signupres = "로그인 돼따 슈바"
+                return render_template("signupres.html", signupRes = signupres)
+                    #raise ValueError
+
+            redirect(url_for("select"))
+
+        #except:
+
+        finally:
+            db.close()
+    else :
+        return render_template('login.html')
+
+
 # url for select
 @app.route("/select")
 def select():
-    # Connect to database
-    db = pymysql.connect(host='localhost',
-                         port=3306,
-                         user='root',
-                         passwd='1111',
-                         db='cs360',
-                         charset='utf8')
+    
     try:
         # Set cursor to the database
         with db.cursor() as cursor:
             # Write SQL query
-            sql = "SELECT * FROM EMPLOYEE;"
+            sql = "SELECT * FROM MUSER;"
             # Execute SQL
             cursor.execute(sql)
 
@@ -33,6 +102,22 @@ def select():
             output = ""
             for row in result:
                 output += "{0} {1}\n".format(row[0], row[2])
+
+            # Set cursor to the database
+        with db.cursor() as cursor:
+            # Write SQL query
+            sql = "SELECT * FROM MGROUP;"
+            # Execute SQL
+            cursor.execute(sql)
+
+            # Fetch the result
+            # result is dictionary type
+            result = cursor.fetchall()
+            # Print tuples
+            for row in result:
+                output += "{0} {1}\n".format(row[0], row[2])
+
+
     finally:
         db.close()
 
@@ -52,13 +137,7 @@ def insert():
 
 @app.route("/insert_sent/<Fname>/<Lname>/<Ssn>")
 def insert_sent(Fname, Lname, Ssn):
-    # Connect to database
-    db = pymysql.connect(host='localhost',
-                         port=3306,
-                         user='root',
-                         passwd='1111',
-                         db='cs360',
-                         charset='utf8')
+    
     try:
         # Set cursor to the database
         with db.cursor() as cursor:
@@ -84,4 +163,4 @@ def insert_sent(Fname, Lname, Ssn):
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', port=5000)
+    app.run('localhost', port=5000)

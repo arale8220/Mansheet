@@ -1,46 +1,40 @@
 import pymysql
 
 # Connect to database
-db = pymysql.connect(host='localhost',
+db = pymysql.connect(host='127.0.0.1',
                      port=3306,
-                     user='root',
-                     passwd='1111',
-                     db='cs360',
+                     user='admin',
+                     passwd='manshinee',
+                     db='mansheet',
                      charset='utf8')
 
 try:
-    # Set cursor to the database
     with db.cursor() as cursor:
-        # Write SQL query
-        sql = """INSERT INTO EMPLOYEE
-                 VALUES('James',
-                        'E',
-                        'Borg',
-                        '888665555',
-                        '1937-11-10',
-                        '450 Stone, Houston, TX',
-                        'M',
-                        55000,
-                        NULL,
-                        1);"""
-        # Execute SQL
+        sql = """INSERT INTO MUSER
+                 VALUES('11아리',
+                        'arale');"""
         cursor.execute(sql)
-    # You must manually commit after every DML methods.
+    
     db.commit()
 
-    # Set cursor to the database
     with db.cursor() as cursor:
-        # Write SQL query
-        sql = "SELECT * FROM EMPLOYEE;"
-        # Execute SQL
+        sql = """INSERT INTO MGROUP(Gname,
+                                    Default_group,
+                                    Owner_uname)
+                 VALUES('11아리의 개인일정',
+                        1,
+                        '11아리');"""
         cursor.execute(sql)
 
-        # Fetch the result
-        # result is dictionary type
+    db.commit()
+
+    with db.cursor() as cursor:
+        sql = "SELECT * FROM MGROUP;"
+        cursor.execute(sql)
         result = cursor.fetchall()
         # Print tuples
-        print("---Employee name---")
+        print("---GROUP name---")
         for row in result:
-            print('{0} {1}'.format(row[0], row[2]))
+            print('{0} {1}'.format(row[1], row[3]))
 finally:
     db.close()
