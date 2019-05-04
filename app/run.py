@@ -15,7 +15,7 @@ def signup():
         password = request.form['Password']
 
         # Connect to database
-        db = pymysql.connect(host='35.200.11.18',
+        db = pymysql.connect(host='localhost',
                              port=3306,
                              user='admin',
                              passwd='manshinee',
@@ -50,7 +50,7 @@ def login():
         password = request.form['Password']
         
         # Connect to database
-        db = pymysql.connect(host='35.200.11.18',
+        db = pymysql.connect(host='localhost',
                              port=3306,
                              user='admin',
                              passwd='manshinee',
@@ -138,6 +138,14 @@ def insert():
 @app.route("/insert_sent/<Fname>/<Lname>/<Ssn>")
 def insert_sent(Fname, Lname, Ssn):
     
+    # Connect to database
+    db = pymysql.connect(host='localhost',
+                         port=3306,
+                         user='admin',
+                         passwd='manshinee',
+                         db='mansheet',
+                         charset='utf8')
+
     try:
         # Set cursor to the database
         with db.cursor() as cursor:
