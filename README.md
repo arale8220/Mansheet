@@ -1,7 +1,4 @@
-# Mansheet
-cs360 in 2019 spring
-
---Installation
+#Installation
 After installation in tutorial, there are some errors at pymysql.connect.
 
 @RuntimeError: cryptography is required for sha256_password or caching_sha2_password
