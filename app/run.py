@@ -25,14 +25,28 @@ def signup():
         try:
             with db.cursor() as cursor:
                 sql = """INSERT INTO MUSER
-                         VALUES('""" + Uname + """',
-                                '""" + Password + """');"""
+                        VALUES('""" + uname + """',
+                                '""" + password + """'); """
                 cursor.execute(sql)
-            db.commit()
-            signupres = "회원가입이 성공적으로 완료되었습니다 \n환영합니다!"
+                db.commit()
 
-        except:
-            signupres = "회원가입에 실패하였습니다. \n이미 해당 닉네의 사용자가 존재합니다"
+                sql = """INSERT INTO MGROUP(Gname, Default_group, Owner_uname) 
+                        VALUES ( '""" + uname + """의 일정' ,
+                                'Y', '""" + uname + """');"""
+                cursor.execute(sql)
+                db.commit()
+
+                sql = """SELECT last_insert_id();"""
+                cursor.execute(sql)
+                last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
+
+                sql = """INSERT INTO PARTICIPATE 
+                        VALUES ( '""" + uname + """' ,
+                                """ + last_insert_id + """);"""
+                cursor.execute(sql)
+                db.commit()
+
+                signupres = "회원가입이 성공적으로 완료되었습니다 \n환영합니다!"
 
         finally:
             db.close()
@@ -65,14 +79,11 @@ def login():
 
 
                 if ((uname != row[0]) or (password != row[1])) : 
-                    signupres = "로그인에 실패하였습니다. \n아이디와 비밀번호를 다시 한번 확인해주세요...\n 지금 값은 {0}".format(row)
-            
+                    signupres = "로그인에 실패하였습니다. \n아이디와 비밀번호를 다시 한번 확인해주세요..."
+                    return render_template("signupres.html", signupRes = signupres)
                 else : 
-                    signupres = "로그인 돼따 슈바"
-                return render_template("signupres.html", signupRes = signupres)
-                    #raise ValueError
 
-            redirect(url_for("select"))
+                    return render_template("main.html")
 
         #except:
 
@@ -171,4 +182,4 @@ def insert_sent(Fname, Lname, Ssn):
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run('35.200.11.18', port=5000)
+    app.run('localhost', port=50000)
