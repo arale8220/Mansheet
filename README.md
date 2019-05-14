@@ -1,6 +1,11 @@
 # Mansheet
 cs360 in 2019 spring
 
+
+## make database 
+mysql 연결 후 sorce app/schema/makeMansheet.sql 실행
+
+~~
 ## Installation
 After installation in tutorial, there are some errors at pymysql.connect.
 
@@ -35,4 +40,5 @@ $ sudo apt-get autoremove
 $ sudo apt-get install python3
 $ sudo apt-get install python3-pip
 $ sudo pip3 install --upgrade pip
+~~
 

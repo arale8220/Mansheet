@@ -2,6 +2,8 @@ from flask import Flask, render_template, redirect, url_for, request
 import pymysql
 
 app = Flask(__name__)
+uname = ""
+gid = 0
 
 @app.route("/")
 def index():
@@ -42,7 +44,7 @@ def signup():
 
                 sql = """INSERT INTO PARTICIPATE 
                         VALUES ( '""" + uname + """' ,
-                                """ + last_insert_id + """);"""
+                                """ + str(last_insert_id) + """);"""
                 cursor.execute(sql)
                 db.commit()
 
@@ -82,8 +84,12 @@ def login():
                     signupres = "로그인에 실패하였습니다. \n아이디와 비밀번호를 다시 한번 확인해주세요..."
                     return render_template("signupres.html", signupRes = signupres)
                 else : 
-
-                    return render_template("main.html")
+                    with db.cursor() as cursor:
+                        sql = """select Gid from MGROUP where Owner_uname='""" + uname + """' AND Default_group='Y';"""
+                        cursor.execute(sql)
+                        row = cursor.fetchone()
+                        gid = row[0]
+                    return redirect(url_for('main', Uname = uname, Gid = gid))
 
         #except:
 
@@ -93,8 +99,42 @@ def login():
         return render_template('login.html')
 
 
+
+@app.route("/main/<Uname>/<Gid>")
+def main(Uname, Gid):
+
+    # Connect to database
+    db = pymysql.connect(host='localhost',
+                         port=3306,
+                         user='admin',
+                         passwd='manshinee',
+                         db='mansheet',
+                         charset='utf8')
+
+    try:
+        with db.cursor() as cursor:
+            sql = """select Gid,Gname from MGROUP where Owner_uname='""" + Uname + """';"""
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            output = ""
+            for row in result:
+                output += "{0}\n".format(row[1])
+
+            sql = """select * from SCHEDULE where Uname='""" + Uname + """' AND Gid=""" + str(Gid) + """;"""
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            schedules = ""
+            for row in result:
+                schedules += "{0} {1} \n".format(row[0], row[1])
+
+        return render_template("main.html", Groups = output, Schedules = schedules)
+    finally :
+        db.close();
+
 # url for select
-@app.route("/select")
+@app.route("/select/<Uname>/<Gid>")
 def select():
     
     try:
