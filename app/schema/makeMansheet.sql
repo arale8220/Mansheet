@@ -4,6 +4,10 @@
 CREATE DATABASE mansheet default CHARACTER SET UTF8;
  
 use mansheet;
+
+create user 'admin'@'localhost' identified by 'manshinee';
+
+grant all privileges on mansheet.* to 'admin'@'localhost';
  
 CREATE TABLE MUSER(
     Uname		varchar(10) NOT NULL PRIMARY KEY,
