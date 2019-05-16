@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+  <meta charset="utf-8">
   <h1> CS360 Flask tutorial </h1><br>
 </head>
 
 <body>
-    <a>My Groups</a><br>
-    <a>{{Groups}}</a>
-    <a href="/showS">show schedules</a><br>
-    <a href="/showS">show schedules</a><br>
-    <a href="/showS">show schedules</a><br>
-    <a href="/changeS">change schedules</a><br>
-    <a href="/changeG">change group</a><br>
-    <a href="/makeG">make group</a><br>
-    <a href="/makeS">make schedule</a><br>
+    <a href="/makeG">make group</a><br><br><br>
+    <a herf="/showGroups">My Groups</a><br>
+    <a style="white-space: pre-line">{{Groups}}</a><br><br><br>
+    <a href="/showSchedules/내 이름/그룹 아이디">show/refresh schedules</a><br>
+    <a style="white-space: pre-line">{{Schedules}}</a><br><br><br>
+    <a href="/changeSchedule">make/change schedules</a><br>
+
+
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
 </body>
 </html>
+
