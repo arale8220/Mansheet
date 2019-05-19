@@ -2,37 +2,36 @@
 cs360 in 2019 spring
 
 
-# 서버 실행
-## make database 
+## 서버 실행
+1. make database <br/>
 mysql 연결 후 sorce app/schema/makeMansheet.sql 실행
 
-## 서버 API 실행
+2. 서버 API 실행<br/>
 python3 newvenv/api.py. ~~run file 아님~~
 
 ## Installation
 실행 시에 아래 에러들 뜨면 추가로 설치해주기
 
-@RuntimeError: cryptography is required for sha256_password or caching_sha2_password
+@RuntimeError: cryptography is required for sha256_password or caching_sha2_password<br/>
 pip install cryptography ~~나는 pip3로 받아서 아래부터는 다 pip3로 쓸게요~~
 
-@(1044, "Access denied for user 'admin'@'%' to database 'mansheet'")
--계정 추가 및 prviileges 설정 후 flush 반드시 해야!
--root에서 create roll 하고 롤에 설정한 privilege를 적용하면 에러가 나는 것 같다.
-  그냥 계정 자체에 privilege 추가해주면 오류가 안생긴다. ~~이럴거면 왜 롤을 만든거지~~
--grant로 새로운 유저 만들면 에러. create로 만들고 나서 grant로 privilege 옵션으로 주기
--우선은 admin@manshinee로 설정. 
+@(1044, "Access denied for user 'admin'@'%' to database 'mansheet'")<br/>
+-계정 추가 및 prviileges 설정 후 flush 반드시 해야!<br/>
+-root에서 create roll 하고 롤에 설정한 privilege를 적용하면 에러가 나는 것 같다.<br/>
+  그냥 계정 자체에 privilege 추가해주면 오류가 안생긴다. ~~이럴거면 왜 롤을 만든거지~~<br/>
+-grant로 새로운 유저 만들면 에러. create로 만들고 나서 grant로 privilege 옵션으로 주기<br/>
+-우선은 admin@manshinee로 설정. <br/>
 
-@ModuleNotFoundError: No mpodule named 'flask_restful'
+@ModuleNotFoundError: No mpodule named 'flask_restful'<br/>
 pip3 install flask-restful
 
-@ModuleNotFoundError: No mpodule named 'flask'
+@ModuleNotFoundError: No mpodule named 'flask'<br/>
 pip3 install flask
 
 
 
-# API : JSON in Body
-우선 127.0.0.1:5000 기준
-## /user [POST] 
+# API : JSON in Body, 127.0.0.1:5000
+## 회원가입 /user [POST] 
 ```json
 {
 	"username" : "아이디",
@@ -49,7 +48,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우
 ### Response status 201 with "Message"
 성공적으로 아이디를 생성한 경우
 
-## /user [DELETE] 
+## 탈퇴 /user [DELETE] 
 ```json
 {
 	"username" : "아이디",
