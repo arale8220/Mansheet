@@ -1,12 +1,12 @@
 -- file name : test.sql
 -- pwd : /project_name/app/schema/test.sql
- 
+
+DROP DATABASE mansheet;
 CREATE DATABASE mansheet default CHARACTER SET UTF8;
- 
-use mansheet;
+USE mansheet;
 
+drop user 'admin'@'localhost';
 create user 'admin'@'localhost' identified by 'manshinee';
-
 grant all privileges on mansheet.* to 'admin'@'localhost';
  
 CREATE TABLE MUSER(
@@ -37,6 +37,26 @@ CREATE TABLE SCHEDULE(
     FOREIGN KEY(Uname) REFERENCES MUSER(Uname),
     FOREIGN KEY(Gid) REFERENCES MGROUP(Gid)
 ) CHARSET=utf8;
+
+/* 
+
+DROP PROCEDURE IF EXISTS createMuser; 
+DELIMITER //
+CREATE PROCEDURE createMuser(
+    IN _Uname VARCHAR(10), 
+    IN _Password VARCHAR(40)
+)
+BEGIN
+    IF (select exists (select 1 from MUSER where Uname = _Uname)) THEN
+        select 'Username Exists!!';
+    ELSE
+        insert into MUSER values ( _Uname, _Password );
+    END IF;
+END
+//
+DELIMITER ;
+
+ */
 
 
 
