@@ -54,6 +54,21 @@ class User(Resource):
             sql = """insert into MUSER values ('""" + _Uname + """', '""" + _Password + """');"""
             cursor.execute(sql)
             conn.commit()
+
+            #유저의 default 그룹 생성
+            sql = """INSERT INTO MGROUP(Gname, Default_group, Owner_uname) 
+                    VALUES ( '""" + _Uname + """의 일정' , 'Y', '""" + _Uname + """');"""
+            cursor.execute(sql)
+            conn.commit()
+            sql = """SELECT last_insert_id();"""
+            cursor.execute(sql)
+            last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
+            sql = """INSERT INTO PARTICIPATE 
+                    VALUES ( '""" + _Uname + """' ,
+                            """ + str(last_insert_id) + """);"""
+            cursor.execute(sql)
+            conn.commit()
+
             res = {'Message': "User created successfully. \nGo to mainpage for log-in"}
             return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
 
@@ -76,7 +91,7 @@ class User(Resource):
             sql = """select * from MUSER where Uname = '""" + _Uname + """';"""
             cursor.execute(sql)
             existing = cursor.fetchone()
-            return str(already[1])
+
             if existing is None: #존재하지 않는 아이디인 경우
                 res = {'Message': "User does not exists"}
                 return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
@@ -84,8 +99,7 @@ class User(Resource):
                 res = {'Message': "Please enter right password for secession"}
                 return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
 
-
-            #유저 삭제
+            #유저 삭제 ==> 하나씩 다시 해야해
             sql = """delete from muser where Uname = '""" + _Uname + """' and Password = '""" + _Password + """';"""
             cursor.execute(sql)
             conn.commit()
