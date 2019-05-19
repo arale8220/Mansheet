@@ -2,12 +2,25 @@
 cs360 in 2019 spring
 
 
+## mysql, flask installation
+### mysql
+1. https://dev.mysql.com/downloads/mysql/
+2. 설치 도중 root user의 password 설정하기
+3. 완료 후 터미널에 $ mysql -u root -p (앞에서 설정한 패스워드)
+
+### Flask 설치
+1. Python 3.7 ==> https://www.python.org/
+2. virtualenv ==> https://virtualenv.pypa.io/en/latest/
+3. Flask ==> 터미널에 $ pip3 install Flask
+4. PyMySQL ==> $ pip3 install PyMySQL
+
+
 ## 서버 실행
 1. make database <br/>
 mysql 연결 후 source app/schema/makeMansheet.sql 실행
 
 2. 서버 API 실행<br/>
-python3 newvenv/api.py. ~~run file 아님~~
+python3 newvenv/api.py.   ~~run file 아님~~
 
 ## Installation
 실행 시에 아래 에러들 뜨면 추가로 설치해주기
