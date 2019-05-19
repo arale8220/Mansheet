@@ -4,7 +4,7 @@ cs360 in 2019 spring
 
 ## 서버 실행
 1. make database <br/>
-mysql 연결 후 sorce app/schema/makeMansheet.sql 실행
+mysql 연결 후 source app/schema/makeMansheet.sql 실행
 
 2. 서버 API 실행<br/>
 python3 newvenv/api.py. ~~run file 아님~~
@@ -24,6 +24,9 @@ pip install cryptography ~~나는 pip3로 받아서 아래부터는 다 pip3로 
 
 @ModuleNotFoundError: No mpodule named 'flask_restful'<br/>
 pip3 install flask-restful
+
+@ModuleNotFoundError: No mpodule named 'flaskext'<br/>
+pip3 install flask-mysql
 
 @ModuleNotFoundError: No mpodule named 'flask'<br/>
 pip3 install flask
