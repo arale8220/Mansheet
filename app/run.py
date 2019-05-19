@@ -1,6 +1,14 @@
 from flask import Flask, render_template, redirect, url_for, request
 import pymysql
 
+#ivyro.net
+#id gksquf9801
+#pw nFUDgXeBRqHD3M
+#mysql host : localhost
+#mysql db name : gksquf9801
+#mysql user name : gksquf9801
+#mysql pw : manshin2015
+
 app = Flask(__name__)
 uname = ""
 gid = 0
