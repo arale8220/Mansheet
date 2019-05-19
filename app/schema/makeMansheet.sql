@@ -30,7 +30,8 @@ CREATE TABLE PARTICIPATE(
 ) CHARSET=utf8;
 
 CREATE TABLE SCHEDULE(
-    Start_time	varchar(16) NOT NULL,
+    Start_date  varchar(10) NOT Null,
+    Start_time	varchar(15) NOT NULL,
     Description	VARCHAR(40),
     Uname 		varchar(10) NOT NULL,
     Gid 		int 		NOT NULL,

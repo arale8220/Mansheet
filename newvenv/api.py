@@ -3,6 +3,7 @@ from flask_restful import Resource, Api
 from flask_restful import reqparse
 from flaskext.mysql import MySQL
 from flask import Response
+import json
 
 app = Flask(__name__)
 api = Api(app)
@@ -60,6 +61,8 @@ class User(Resource):
                     VALUES ( '""" + _Uname + """의 일정' , 'Y', '""" + _Uname + """');"""
             cursor.execute(sql)
             conn.commit()
+
+            #유저가 default 그룹에 들어가있다는 관계 추가
             sql = """SELECT last_insert_id();"""
             cursor.execute(sql)
             last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
@@ -99,12 +102,66 @@ class User(Resource):
                 res = {'Message': "Please enter right password for secession"}
                 return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
 
-            #유저 삭제 ==> 하나씩 다시 해야해
-            sql = """delete from muser where Uname = '""" + _Uname + """' and Password = '""" + _Password + """';"""
+            #유저 삭제
+            sql = """delete from SCHEDULE where Uname = '""" + _Uname + """';"""
+            cursor.execute(sql)
+            conn.commit()
+            sql = """delete from PARTICIPATE where Uname = '""" + _Uname + """';"""
+            cursor.execute(sql)
+            conn.commit()
+            sql = """delete from MGROUP where Owner_uname = '""" + _Uname + """';"""
+            cursor.execute(sql)
+            conn.commit()
+            sql = """delete from MUSER where Uname = '""" + _Uname + """';"""
             cursor.execute(sql)
             conn.commit()
             res = {'Message': "User deleted successfully. \nGo to mainpage for log-in"}
             return Response(str(res).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return Response(str({'error': str(e)}), status=400, mimetype="application/json")
+
+    def get(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('username', type=str)
+            parser.add_argument('password', type=str)
+            args = parser.parse_args()
+
+            _Uname = args['username']
+            _Password = args['password']
+
+            #이미 있는 유저의 아이디인지 확인
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            sql = """select * from MUSER where Uname = '""" + _Uname + """';"""
+            cursor.execute(sql)
+            existing = cursor.fetchone()
+
+            if existing is None: #존재하지 않는 아이디인 경우
+                res = {'Message': "User does not exists"}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+            if existing[1] != _Password: #옳지 않은 비밀번호를 입력한 경우
+                res = {'Message': "Please enter right password for log-in"}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+
+            #로그인 된 유저의 디폴트 그룹의 GID 가져오기
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            sql = """select * from MGROUP where Owner_uname = '""" + _Uname + """' and Default_group = 'Y';"""
+            cursor.execute(sql)
+            defaultgid = cursor.fetchone()[0]
+
+            #로그인 된 유저의 디폴트 그룹에 해당하는 개인 스케쥴 모두 쿼리
+            sql = """select * from SCHEDULE where Uname = '""" + _Uname + """' and Gid = """ + str(defaultgid) + """;"""
+            cursor.execute(sql)
+            row_headers=[x[0] for x in cursor.description]
+            schedules = cursor.fetchall()
+
+            json_data=[]
+            for one in schedules:
+                json_data.append(dict(zip(row_headers,one)))
+            return Response(str(json_data).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
             return Response(str({'error': str(e)}), status=400, mimetype="application/json")
