@@ -3,11 +3,14 @@ from flask_restful import Resource, Api
 from flask_restful import reqparse
 from flaskext.mysql import MySQL
 from flask import Response
+from flask_cors import CORS, cross_origin
+
 import json
 
 app = Flask(__name__)
 api = Api(app)
 
+CORS(app, origins="*")
 
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'admin'
@@ -18,6 +21,7 @@ mysql.init_app(app)
 
 
 class User(Resource):
+    @cross_origin()
     def post(self):
         try:
             parser = reqparse.RequestParser()
@@ -78,6 +82,7 @@ class User(Resource):
         except Exception as e:
             return Response(str({'error': str(e)}), status=400, mimetype="application/json")
 
+    @cross_origin()
     def delete(self):
         try:
             parser = reqparse.RequestParser()
@@ -120,7 +125,8 @@ class User(Resource):
 
         except Exception as e:
             return Response(str({'error': str(e)}), status=400, mimetype="application/json")
-
+    
+    @cross_origin()
     def get(self):
         try:
             parser = reqparse.RequestParser()
