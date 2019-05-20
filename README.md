@@ -44,10 +44,13 @@ pip3 install flask-mysql
 @ModuleNotFoundError: No mpodule named 'flask'<br/>
 pip3 install flask
 
+@ModuleNotFoundError: No mpodule named 'flask_cors'<br/>
+pip3 install flask_cors
+
 
 
 # API : JSON in Body, 127.0.0.1:5000
-### 회원가입 /user [POST] 
+## 회원가입 /user [POST] 
 body json input
 ```json
 ====input====
@@ -83,7 +86,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
-### 탈퇴 /user [DELETE] 
+## 탈퇴 /user [DELETE] 
 ```json
 ====input====
 {
@@ -112,7 +115,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
-### 로그인 /user [GET] 
+## 로그인 /user [GET] 
 ```json
 ====input====
 {

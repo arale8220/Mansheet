@@ -52,9 +52,11 @@ class User(Resource):
                 return user406Response("User already exists")
 
             #유저 추가 프로시져 실행
-            args = [_Uname, _Password, 0]
+            args = (_Uname, _Password, 0)
             result_args = cursor.callproc('createMuser', args)
-            if result_args[2]:
+            cursor.execute('SELECT @_createMuser_2') 
+            result = cursor.fetchone()
+            if result[0]:
                 return user20XResponse("User created successfully. \nGo to mainpage for log-in", \
                         _Uname, _Password, 201)
             else:
@@ -93,7 +95,9 @@ class User(Resource):
             #유저 삭제 프로시져 실행
             args = [_Uname, _Password, 0]
             result_args = cursor.callproc('deleteMuser', args)
-            if result_args[2]:
+            cursor.execute('SELECT @_deleteMuser_2') 
+            result = cursor.fetchone()
+            if result[0]:
                 return user20XResponse("User deleted successfully. \nGo to mainpage for log-in", \
                         _Uname, _Password, 200)
             else:
@@ -203,6 +207,12 @@ class GROUP(Resource):
         finally:
             cursor.close()
             conn.close()
+
+    def get(self):
+        raise NotImplementedError()
+
+    def delete(self):
+        raise NotImplementedError()
 
 
         
