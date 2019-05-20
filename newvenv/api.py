@@ -204,8 +204,6 @@ class GROUP(Resource):
             cursor.close()
             conn.close()
 
-    def get(self):
-
 
         
 
