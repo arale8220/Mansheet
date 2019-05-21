@@ -111,7 +111,7 @@ class USER(Resource):
             conn.close()
     
     @cross_origin()
-    def get(self):
+    def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
         parser.add_argument('password', type=str)
