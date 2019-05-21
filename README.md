@@ -156,6 +156,88 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
+## 그룹 생성 /group [POST] 
+```json
+====input====
+{
+	"username" : "아이디",
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 406 with "Message"
+그룹 이름의 길이가 1글자보다 짧은 경우<br/>
+그룹 이름의 길이가 30글자보다 긴 경우<br/>
+이미 같은 이름의 그룹이 존재하는 경우<br/>
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+#### Ressponse status 201 with "Message"
+성공적으로 로그인된 경우
+```json
+====output====
+{
+	"message" : "Message",
+	"username" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
+
+
+## 그룹 정보 /group [POST] ==>하는중
+```json
+====input====
+{
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 200
+성공적으로 로그인된 경우
+```json
+====output====
+{
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
+
+
+
+
 
 
 

@@ -16,7 +16,7 @@ CREATE TABLE MUSER(
 
 CREATE TABLE MGROUP(
 	Gid				int			NOT NULL PRIMARY KEY AUTO_INCREMENT, 
-    Gname			varchar(30) NOT NULL,
+    Gname			varchar(30) NOT NULL UNIQUE,
     Default_group	CHAR(1)		NOT NULL DEFAULT 'N',
     Owner_uname		varchar(10)	NOT NULL,
     FOREIGN KEY(Owner_uname) REFERENCES MUSER(Uname)
@@ -63,7 +63,6 @@ BEGIN
 END $$
 
 
-
 DROP PROCEDURE IF EXISTS deleteMuser $$ 
 CREATE PROCEDURE deleteMuser(
     IN  _Uname      VARCHAR(10), 
@@ -85,8 +84,72 @@ BEGIN
     SET RESULT = 1;
 END $$
 
-DELIMITER ;
 
+DROP PROCEDURE IF EXISTS createMgroup $$ 
+CREATE PROCEDURE createMgroup(
+    IN  _Uname      VARCHAR(10), 
+    IN  _Gname      VARCHAR(30),
+    OUT RESULT      INT,
+    OUT Gid         INT
+)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+    BEGIN
+        ROLLBACK;        
+        SET RESULT = 0;  
+    END;
+    START TRANSACTION;
+        INSERT INTO MGROUP(Gname, Owner_uname)
+            VALUES ( _Gname, _Uname);
+        SET Gid = last_insert_id();
+        INSERT INTO PARTICIPATE 
+            VALUES ( _Uname, last_insert_id() );
+    COMMIT;
+    SET RESULT = 1;
+END $$
+
+
+DROP PROCEDURE IF EXISTS deleteMgroup $$ 
+CREATE PROCEDURE deleteMgroup(
+    IN  _Gid      VARCHAR(30),
+    OUT RESULT      INT
+)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+    BEGIN
+        ROLLBACK;        
+        SET RESULT = 0;  
+    END;
+    START TRANSACTION;
+        DELETE FROM SCHEDULE WHERE Gid=_Gid;
+        DELETE FROM PARTICIPATE WHERE Gid=_Gid;
+        DELETE FROM MGROUP WHERE Gid=_Gid;
+    COMMIT;
+    SET RESULT = 1;
+END $$
+
+
+DROP PROCEDURE IF EXISTS getMgroup $$ 
+CREATE PROCEDURE getMgroup(
+    IN  _Gid      VARCHAR(30),
+    OUT RESULT      INT,
+    OUT Gid         INT
+)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+    BEGIN
+        ROLLBACK;        
+        SET RESULT = 0;  
+    END;
+    START TRANSACTION;
+        DELETE FROM SCHEDULE WHERE Gid=_Gid;
+        DELETE FROM PARTICIPATE WHERE Gid=_Gid;
+        DELETE FROM MGROUP WHERE Gid=_Gid;
+    COMMIT;
+    SET RESULT = 1;
+END $$
+
+DELIMITER ;
 
 
 
