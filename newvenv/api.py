@@ -175,7 +175,7 @@ class GROUP(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
         parser.add_argument('groupname', type=str)
-        parser.add_argument('entries')
+        parser.add_argument('entries', action='append')
         args = parser.parse_args()
 
         _Uname = args['username']
@@ -187,25 +187,39 @@ class GROUP(Resource):
             return bad406Response("Group name is too short")
         if (len(_Uname)>30):
             return bad406Response("Group name is too long")
+        if (_Entries is None):
+            return bad406Response("There is no entries in json body")
 
         try:
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
-            args = [_Uname, _Gname, 0]
+            args = [_Uname, _Gname, 0, 0]
             result_args = cursor.callproc('createMgroup', args)
             cursor.execute('SELECT @_createMgroup_2, @_createMgroup_3') 
             result = cursor.fetchone()
             if result[0]:
-                schedules = []
+                json_schedules = []
+                condition_str = "Gid = " + str(result[1])
+                add_str = " or Uname = \'"
                 for i in _Entries:
                     cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""")
-############3 넣고 받아오기. 넣는건 위에
+                    condition_str += add_str + i['username'] + "\'"
+
+                sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
+                cursor.execute(sql)
+                row_headers=[x[0] for x in cursor.description]
+                schedules = cursor.fetchall()
+                for one in schedules:
+                    json_schedules.append(dict(zip(row_headers,one)))
+
                 res = {'message': "Group created successfully.", \
                         'ownername':_Uname, 'groupname':_Gname, \
-                        'schedules' : , \
+                        'schedules' : json_schedules, \
                         'entries' : _Entries}
-                    return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+            
             else:
                 return bad406Response("Please check that you already have group with same name")
 

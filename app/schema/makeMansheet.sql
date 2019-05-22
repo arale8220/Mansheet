@@ -30,7 +30,8 @@ CREATE TABLE PARTICIPATE(
 ) CHARSET=utf8;
 
 CREATE TABLE SCHEDULE(
-    Start_date  varchar(10) NOT Null,
+    Sid         INT         NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Start_date  varchar(10) NOT NULL,
     Start_time	varchar(15) NOT NULL,
     Duration    INT         NOT NULL,
     Description	VARCHAR(40),
@@ -91,7 +92,7 @@ CREATE PROCEDURE createMgroup(
     IN  _Uname      VARCHAR(10), 
     IN  _Gname      VARCHAR(30),
     OUT RESULT      INT,
-    OUT Gid         INT
+    OUT _Gid         INT
 )
 BEGIN
     DECLARE exit handler for SQLEXCEPTION
@@ -102,11 +103,11 @@ BEGIN
     START TRANSACTION;
         INSERT INTO MGROUP(Gname, Owner_uname)
             VALUES ( _Gname, _Uname);
-        SET Gid = last_insert_id();
+        SET _Gid = last_insert_id();
         INSERT INTO PARTICIPATE 
             VALUES ( _Uname, last_insert_id() );
+        SET RESULT = 1;
     COMMIT;
-    SET RESULT = 1;
 END $$
 
 

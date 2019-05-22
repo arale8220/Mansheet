@@ -162,7 +162,11 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ====input====
 {
 	"username" : "아이디",
-	"groupname" : "그룹 이름"
+	"groupname" : "그룹 이름",
+	"entries" : [
+		{"username" : "탑을 제외한 엔트리 이름"},
+		,,,
+	]
 }
 ```
 #### Ressponse status 406 with "Message"
@@ -181,7 +185,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ====output====
 {
 	"message" : "Message",
-	"username" : "아이디",
+	"ownername" : "아이디",
 	"groupname" : "그룹 이름",
 	"schedules" : [
         {
