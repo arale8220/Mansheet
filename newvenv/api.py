@@ -161,6 +161,7 @@ class USER(Resource):
             return Response(str(res).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
+            print(e)
             return error400Response(str(e))
 
         finally:
@@ -194,7 +195,7 @@ class GROUP(Resource):
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
-            args = [_Uname, _Gname, 0, 0]
+            args = (_Uname, _Gname, 0, 0)
             result_args = cursor.callproc('createMgroup', args)
             cursor.execute('SELECT @_createMgroup_2, @_createMgroup_3') 
             result = cursor.fetchone()
@@ -379,12 +380,86 @@ class ALLGROUOP(Resource):
             conn.close()
 
 
+# mysql> insert into muser (uname, password) values ("13dd", "1234");
+# mysql> insert into mgroup (gname, owner_uname) Values ("2-on", "13dd");
+
+
+class SCHEDULE(Resource):
+    #post -> 데이터 만들기
+    #create 후 sid 만들기   
+    def post(self):
+         # POST = 1
+         try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('start_date', type=str)
+            parser.add_argument('start_time', type=str)
+            parser.add_argument('username', type=str)
+            parser.add_argument('groupname',type=str)
+            parser.add_argument('description', type=str)
+            parser.add_argument('duration', type=str)
+            parser.add_argument('sid', type=str)
+            args = parser.parse_args()
+
+            _startDate = args['start_date']
+            _startTime = args['start_time']
+            _Gname = args['groupname']
+            _Uname = args['username']
+            _Description = args['description'] or ''
+            _Duration = args['duration']
+            # _Sid= args['sid']
+
+            #StartTime 길이 확인
+            if (len(_startDate)<1) or (len(_startDate)>10):
+                res = {'message': "Start date is too short or too long"}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+
+            #그룹 추가
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select gid from MGROUP where Gname = '""" + _Gname + """';""" ) 
+            fetchGid = cursor.fetchone()
+            if (fetchGid[0]):
+                sql = """INSERT INTO SCHEDULE(Start_date,start_time,Uname,duration, Gid, description) 
+                    VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
+            cursor.execute(sql)
+            conn.commit()
+
+            #유저와 그룹 관계 추가
+            # sql = """SELECT last_insert_id();"""
+            # cursor.execute(sql)
+            # last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
+            # sql = """INSERT INTO PARTICIPATE 
+            #         VALUES ( '""" + _Uname + """' ,
+            #                 """ + str(last_insert_id) + """);"""
+            # cursor.execute(sql)
+            # conn.commit()
+
+            res = {'message': "schedule created successfully."}
+            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+         except Exception as e :
+            print(e)
+            return error400Response(str(e))
+
+         finally:
+            cursor.close()
+            conn.close()
+    #update 시간표. Description 바꾸기
+    def update(self):
+        PATCH = 1
+    # 데이터 받아오기
+    def get(self):
+        GET = 1
+    # 데이터 지우기
+    def delete(self):
+        DELETE = 1
         
 
 api.add_resource(USER, '/user')
 api.add_resource(GROUP, '/group')
 api.add_resource(ALLUSER, '/alluser')
 api.add_resource(ALLGROUOP, '/allgroup')
+api.add_resource(SCHEDULE, '/schedule')
 
 
 def bad406Response(msg):
