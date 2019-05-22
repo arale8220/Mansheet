@@ -52,7 +52,7 @@ class USER(Resource):
 
             #유저 추가 프로시져 실행
             args = (_Uname, _Password, 0)
-            result_args = cursor.callproc('createMuser', args)
+            cursor.callproc('createMuser', args)
             cursor.execute('SELECT @_createMuser_2') 
             result = cursor.fetchone()
             if result[0]:
@@ -95,8 +95,8 @@ class USER(Resource):
                 return bad406Response("Please enter right password for secession")
                 
             #유저 삭제 프로시져 실행
-            args = [_Uname, _Password, 0]
-            result_args = cursor.callproc('deleteMuser', args)
+            args = (_Uname, _Password, 0)
+            cursor.callproc('deleteMuser', args)
             cursor.execute('SELECT @_deleteMuser_2') 
             result = cursor.fetchone()
             if result[0]:
@@ -194,18 +194,22 @@ class GROUP(Resource):
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
-            args = [_Uname, _Gname, 0, 0]
-            result_args = cursor.callproc('createMgroup', args)
+            args = (_Uname, _Gname, 0, 0)
+            cursor.callproc('createMgroup', args)
             cursor.execute('SELECT @_createMgroup_2, @_createMgroup_3') 
             result = cursor.fetchone()
+
             if result[0]:
                 json_schedules = []
                 condition_str = "Gid = " + str(result[1])
-                add_str = " or Uname = \'"
-                for i in _Entries:
-                    cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""")
-                    condition_str += add_str + i['username'] + "\'"
+                add_str = " or Uname = '"
 
+                for i in _Entries:
+                    i=json.loads(i.replace("'", "\""))
+                    cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + i['username']+"""', """ + str(result[1]) + """);""")
+                    condition_str += add_str + i['username'] + "'"
+
+                condition_str += add_str + _Uname + "'"
                 sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
                 cursor.execute(sql)
                 row_headers=[x[0] for x in cursor.description]
@@ -214,14 +218,14 @@ class GROUP(Resource):
                     json_schedules.append(dict(zip(row_headers,one)))
 
                 res = {'message': "Group created successfully.", \
-                        'ownername':_Uname, 'groupname':_Gname, \
+                        'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
                         'schedules' : json_schedules, \
                         'entries' : _Entries}
 
                 return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
             
             else:
-                return bad406Response("Please check that you already have group with same name")
+                return bad406Response("Group did no be created. \nPlease check that you make group with undefined user, and group with same name already exists")
 
         except Exception as e:
             return error400Response(str(e))
@@ -241,12 +245,16 @@ class GROUP(Resource):
         _Gname = args['groupname']
 
         try:
-            #그룹 id 가져오기
             conn = mysql.connect()
             cursor = conn.cursor()
+            #그룹 id, 오너 이름 가져오기
+
+            #그룹 엔트리 가져오기
+
+            #그룹의 스케쥴, 엔트리의 개인 스케쥴, 오너의 개인 스케줄 가져오기
 
             args = [_Gname, 0, 0]
-            result_args = cursor.callproc('getMgroup', args)
+            cursor.callproc('getMgroup', args)
             cursor.execute('SELECT @_createMgroup_1, @_createMgroup_2') 
             result = cursor.fetchone()
 
@@ -261,10 +269,10 @@ class GROUP(Resource):
 ############
 
 
-                group_data = {  'groupname':_Gname,\
-                                'ownername':ownername,\
-                                'entries':json_data,\
-                                'schedules':schedules}
+                group_data = {'message': "Group created successfully.", \
+                            'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
+                            'schedules' : json_schedules, \
+                            'entries' : _Entries}
                 return Response(str(group_data).replace("'", "\""), status=200, mimetype='application/json')
 
 
@@ -315,7 +323,7 @@ class GROUP(Resource):
                 
             #그룹 삭제 프로시져 실행
             args = [existing[0], 0]
-            result_args = cursor.callproc('deleteMuser', args)
+            cursor.callproc('deleteMuser', args)
             cursor.execute('SELECT @_deleteMuser_1') 
             result = cursor.fetchone()
             if result[0]:

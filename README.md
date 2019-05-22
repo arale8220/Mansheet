@@ -115,7 +115,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
-## 로그인 /user [GET] 
+## 로그인 /user [PATCH] 
 ```json
 ====input====
 {
@@ -180,13 +180,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 #### Ressponse status 201 with "Message"
-성공적으로 로그인된 경우
+성공적으로 그룹을 만든 경우
 ```json
 ====output====
 {
 	"message" : "Message",
 	"ownername" : "아이디",
 	"groupname" : "그룹 이름",
+	"groupid" : "그룹아이디 int형",
 	"schedules" : [
         {
             "Start_date": "2019-05-20",
@@ -208,7 +209,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
-## 그룹 정보 /group [POST] ==>하는중
+## 그룹 정보 /group [PATCH] 
 ```json
 ====input====
 {
@@ -216,7 +217,6 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 #### Ressponse status 200
-성공적으로 로그인된 경우
 ```json
 ====output====
 {
