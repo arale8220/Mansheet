@@ -32,6 +32,7 @@ CREATE TABLE PARTICIPATE(
 CREATE TABLE SCHEDULE(
     Start_date  varchar(10) NOT Null,
     Start_time	varchar(15) NOT NULL,
+    Duration    INT         NOT NULL,
     Description	VARCHAR(40),
     Uname 		varchar(10) NOT NULL,
     Gid 		int 		NOT NULL,

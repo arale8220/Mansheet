@@ -68,6 +68,8 @@ class USER(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
 
     @cross_origin()
     def delete(self):
@@ -109,6 +111,8 @@ class USER(Resource):
         finally:
             cursor.close()
             conn.close()
+
+        return error400Response("Check the json data you send.")
     
     @cross_origin()
     def get(self):
@@ -163,7 +167,10 @@ class USER(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
 class GROUP(Resource):
+    @cross_origin()
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -190,10 +197,14 @@ class GROUP(Resource):
             cursor.execute('SELECT @_createMgroup_2, @_createMgroup_3') 
             result = cursor.fetchone()
             if result[0]:
-                res = {'message': "Group created successfully.", 'ownername':_Uname, 'groupname':_Gname}
+                schedules = []
                 for i in _Entries:
                     cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""")
-############3
+############3 넣고 받아오기. 넣는건 위에
+                res = {'message': "Group created successfully.", \
+                        'ownername':_Uname, 'groupname':_Gname, \
+                        'schedules' : , \
+                        'entries' : _Entries}
                     return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
             else:
                 return bad406Response("Please check that you already have group with same name")
@@ -205,6 +216,9 @@ class GROUP(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
+    @cross_origin()
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('groupname', type=str)
@@ -262,6 +276,9 @@ class GROUP(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
+    @cross_origin()
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
