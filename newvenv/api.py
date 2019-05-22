@@ -452,7 +452,53 @@ class SCHEDULE(Resource):
         GET = 1
     # 데이터 지우기
     def delete(self):
-        DELETE = 1
+        try:
+            #과연 다른 정보들이 필요한가? Sid만 주면 안되남
+            parser = reqparse.RequestParser()
+            parser.add_argument('start_date', type=str)
+            parser.add_argument('start_time', type=str)
+            parser.add_argument('username', type=str)
+            parser.add_argument('groupname',type=str)
+            parser.add_argument('description', type=str)
+            parser.add_argument('duration', type=str)
+            parser.add_argument('sid', type=str)
+            args = parser.parse_args()
+
+            _startDate = args['start_date']
+            _startTime = args['start_time']
+            _Gname = args['groupname']
+            _Uname = args['username']
+            _Description = args['description'] or ''
+            _Duration = args['duration']
+            _Sid= args['sid']
+
+            #그룹 추가
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select * from SCHEDULE where Sid = '""" + str(_Sid) + """';""" ) 
+            fetchSid = cursor.fetchone()
+            
+            print(fetchSid)
+            
+            # return
+            
+            if (fetchSid[0]):
+                sql = """DELETE FROM SCHEDULE where Sid = '""" + str(_Sid) + """';"""
+            else :
+                res = {'message': "schedule does not exists "}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+            cursor.execute(sql)
+            conn.commit()
+            res = {'message': "schedule deleted successfully."}
+            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+        except Exception as e :
+            print(e)
+            return error400Response(str(e))
+
+        finally:
+            cursor.close()
+            conn.close()
         
 
 api.add_resource(USER, '/user')
