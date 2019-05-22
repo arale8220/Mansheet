@@ -115,7 +115,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
     
     @cross_origin()
-    def get(self):
+    def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
         parser.add_argument('password', type=str)
@@ -388,6 +388,6 @@ class SQLError(Exception):
         return "There are some problem in SQL. It has been rolled back."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('0.0.0.0', debug=True)
 
 
