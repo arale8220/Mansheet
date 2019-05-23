@@ -20,7 +20,7 @@ mysql.init_app(app)
 
 
 class USER(Resource):
-    @cross_origin()
+    
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -71,7 +71,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
 
 
-    @cross_origin()
+
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -114,7 +114,7 @@ class USER(Resource):
 
         return error400Response("Check the json data you send.")
     
-    @cross_origin()
+    
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -173,7 +173,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
 
 class GROUP(Resource):
-    @cross_origin()
+    
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -247,7 +247,7 @@ class GROUP(Resource):
 
         return error400Response("Check the json data you send.")
 
-    @cross_origin()
+
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('groupname', type=str)
@@ -312,7 +312,7 @@ class GROUP(Resource):
 
         return error400Response("Check the json data you send.")
 
-    @cross_origin()
+
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -357,7 +357,7 @@ class GROUP(Resource):
 
 
 class ALLUSER(Resource):
-    @cross_origin()
+    
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -383,7 +383,7 @@ class ALLUSER(Resource):
             conn.close()
 
 class ALLGROUOP(Resource):
-    @cross_origin()
+    
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -440,6 +440,7 @@ class ALLGROUOP(Resource):
 class SCHEDULE(Resource):
     #post -> 데이터 만들기
     #create 후 sid 만들기   
+    
     def post(self):
          # POST = 1
 
@@ -490,7 +491,9 @@ class SCHEDULE(Resource):
         finally:
             cursor.close()
             conn.close()
+
     #update 시간표. Description 바꾸기
+    
     def patch(self):
         try:
             #과연 다른 정보들이 필요한가? Sid만 주면 안되남
@@ -543,6 +546,7 @@ class SCHEDULE(Resource):
             conn.close()
 
     # 데이터 지우기
+    
     def delete(self):
         try:
             #과연 다른 정보들이 필요한가? Sid만 주면 안되남
@@ -579,8 +583,8 @@ class SCHEDULE(Resource):
 
 api.add_resource(USER, '/user')
 api.add_resource(GROUP, '/group')
-api.add_resource(ALLUSER, '/alluser')
-api.add_resource(ALLGROUOP, '/allgroup')
+api.add_resource(ALLUSER, '/allusers')
+api.add_resource(ALLGROUOP, '/allgroups')
 api.add_resource(SCHEDULE, '/schedule')
 
 
