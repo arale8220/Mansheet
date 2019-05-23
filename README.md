@@ -425,6 +425,18 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"username" : "현재 로그인된 유저 이름"
 }
 ```
+#### Ressponse status 406
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+존재하지 않는 이름의 그룹인 경우<br/>
+그룹의 오너가 아닌 유저가 삭제를 시도하는 경우 <br/>
+유저의 디폴트 그룹(개인 일정)을 삭제하려 시도하는 경우 <br/>
+
+
 #### Ressponse status 200
 ```json
 ====output====

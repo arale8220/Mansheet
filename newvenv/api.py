@@ -330,7 +330,7 @@ class GROUP(Resource):
             cursor.execute(sql)
             existing = cursor.fetchone()
 
-            if (existing is None): #존재하지 않는 아이디인 경우
+            if (existing is None): #존재하지 않는 그룹인 경우
                 return bad406Response("Group of that name does not exists")
             if (_Uname != existing[3]): #그룹의 오너와 다른 아이디인 경우
                 return bad406Response("You are not the TOP of this group")
