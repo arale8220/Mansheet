@@ -195,13 +195,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"groupid" : 00,
 	"schedules" : [
         {
-        	"Sid" : 00,
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Duration" : 60,
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
+        	"sid" : 00
+            "start_date": "2019-05-20",
+            "start_time": "20:00",
+            "duration" : 00,
+            "description": "안녕",
+            "username": "00hi",
+            "groupid": 00,
+            "groupname" : "test"
         },
         ,,, "엔트리와 탑의 모든 일정들, 그룹의 일정들"
     ],
