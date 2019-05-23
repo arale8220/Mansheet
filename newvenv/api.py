@@ -332,11 +332,14 @@ class GROUP(Resource):
 
             if (existing is None): #존재하지 않는 아이디인 경우
                 return bad406Response("Group of that name does not exists")
-            if (_Uname == ""): #그룹의 오너와 다른 아이디인 경우
+            if (_Uname != existing[3]): #그룹의 오너와 다른 아이디인 경우
                 return bad406Response("You are not the TOP of this group")
-                
+            if ('Y' == existing[2]): #디폴트 그룹을 지우려 하는 경우
+                return bad406Response("You can not delete default group.")
+
             #그룹 삭제 프로시져 실행
-            args = [existing[0], 0]
+            _Gid = existing[0]
+            args = [_Gid, 0]
             cursor.callproc('deleteMuser', args)
             cursor.execute('SELECT @_deleteMuser_1') 
             result = cursor.fetchone()
