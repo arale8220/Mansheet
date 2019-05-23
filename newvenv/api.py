@@ -144,6 +144,7 @@ class USER(Resource):
             cursor.execute(sql)
             defaultgid = cursor.fetchone()[0]
 
+            '''
             #로그인 된 유저의 디폴트 그룹에 해당하는 개인 스케쥴 모두 쿼리
             sql = """select * from SCHEDULE where Uname = '""" + _Uname + """' and Gid = """ + str(defaultgid) + """;"""
             cursor.execute(sql)
@@ -153,10 +154,11 @@ class USER(Resource):
             json_data=[]
             for one in schedules:
                 json_data.append(dict(zip(row_headers,one)))
+            '''
 
             res = {'message' : "User logged in successfully.", \
                 'username' : _Uname, 'password' : _Password, \
-                'schedules' : json_data}
+                'defaultgid' : defaultgid}
 
             return Response(str(res).replace("'", "\""), status=200, mimetype='application/json')
 
@@ -190,6 +192,7 @@ class GROUP(Resource):
         if (_Entries is None):
             return bad406Response("There is no entries in json body")
 
+
         try:
             #그룹 추가
             conn = mysql.connect()
@@ -204,9 +207,12 @@ class GROUP(Resource):
                 condition_str = "Gid = " + str(result[1])
                 add_str = " or Uname = '"
 
+                _Entries_return = []
                 for i in _Entries:
                     i=json.loads(i.replace("'", "\""))
+                    _Entries_return.append(i)
                     cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + i['username']+"""', """ + str(result[1]) + """);""")
+                    conn.commit()
                     condition_str += add_str + i['username'] + "'"
 
                 condition_str += add_str + _Uname + "'"
@@ -220,12 +226,12 @@ class GROUP(Resource):
                 res = {'message': "Group created successfully.", \
                         'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
                         'schedules' : json_schedules, \
-                        'entries' : _Entries}
+                        'entries' : _Entries_return}
 
                 return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
             
             else:
-                return bad406Response("Group did no be created. \nPlease check that you make group with undefined user, and group with same name already exists")
+                return bad406Response("Group did not be created. \nPlease check that you make group with undefined user, and group with same name already exists")
 
         except Exception as e:
             return error400Response(str(e))
@@ -237,7 +243,7 @@ class GROUP(Resource):
         return error400Response("Check the json data you send.")
 
     @cross_origin()
-    def get(self):
+    def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('groupname', type=str)
         args = parser.parse_args()
@@ -248,48 +254,45 @@ class GROUP(Resource):
             conn = mysql.connect()
             cursor = conn.cursor()
             #그룹 id, 오너 이름 가져오기
+            sql = """SELECT Gid, Owner_uname FROM MGROUP WHERE Gname = '""" + _Gname + """';"""
+            cursor.execute(sql)
+            existing = cursor.fetchone()
+            _Gid = existing[0]
+            _Owner = existing[1]
 
             #그룹 엔트리 가져오기
+            sql = """SELECT Uname FROM PARTICIPATE WHERE Gid = """ + str(_Gid) + \
+                    """ and Uname <> """ + _Owner + """;"""
+            cursor.execute(sql)
+            _Entries = []
+            condition_str = "Gid = " + str(_Gid)
+            add_str = " or Uname = '"
+            schedules = cursor.fetchall()
+            for one in schedules:
+                _Entries.append({"username" : one[0]})
+                condition_str += add_str + one[0] + "'"
 
             #그룹의 스케쥴, 엔트리의 개인 스케쥴, 오너의 개인 스케줄 가져오기
+            condition_str += add_str + _Owner + "'"
+            sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
+            cursor.execute(sql)
+            row_headers=[x[0] for x in cursor.description]
+            _Schedules = []
+            schedules = cursor.fetchall()
+            for one in schedules:
+                _Schedules.append(dict(zip(row_headers,one)))
 
-            args = [_Gname, 0, 0]
-            cursor.callproc('getMgroup', args)
-            cursor.execute('SELECT @_createMgroup_1, @_createMgroup_2') 
-            result = cursor.fetchone()
+            #결과 정리
+            result = {
+                        "message" : "Goup informatino fetched.",
+                        "ownername" : _Owner,
+                        "groupname" : _Gname,
+                        "groupid" : _Gid,
+                        "schedules" : _Schedules,
+                        "entries" : _Entries
+                    }
 
-            if result[0]:
-                cursor.execute("""select Uname from PARTICIPATE where Gid = '""" + result[1] + """";""" ) 
-                users = cursor.fetchall()
-                json_data = []
-                for user in users:
-                    content = {'username': user[0]}
-                    json_data.append(content)
-
-############
-
-
-                group_data = {'message': "Group created successfully.", \
-                            'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
-                            'schedules' : json_schedules, \
-                            'entries' : _Entries}
-                return Response(str(group_data).replace("'", "\""), status=200, mimetype='application/json')
-
-
-
-
-
-
-
-
-
-
-                res = {'message': "Group created successfully.", 'ownername':_Uname, 'groupname':_Gname}
-                for i in _Entries:
-                    cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""") 
-                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
-            else:
-                return bad406Response("Please check that you already have group with same name")
+            return Response(str(result).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
             return error400Response(str(e))
@@ -340,22 +343,23 @@ class GROUP(Resource):
 
 
 class ALLUSER(Resource):
-    def get(self):
-        try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str)
-            args = parser.parse_args()
-            _Uname = args['username']
+    @cross_origin()
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        args = parser.parse_args()
+        _Uname = args['username']
 
+        try:
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.execute("""select Uname from MUSER where Uname <> '""" + _Uname + """";""" ) 
+            cursor.execute("""SELECT Uname from MUSER where Uname <> '""" + _Uname + """';""" ) 
             rv = cursor.fetchall()
-            alluser = []
+            _Alluser = []
             for result in rv:
                 content = {'username': result[0]}
-                payload.append(content)
-            return Response(str(alluser).replace("'", "\""), status=200, mimetype='application/json')
+                _Alluser.append(content)
+            return Response(str(_Alluser).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
             return error400Response(str(e))
@@ -365,18 +369,52 @@ class ALLUSER(Resource):
             conn.close()
 
 class ALLGROUOP(Resource):
-    def get(self):
+    @cross_origin()
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        args = parser.parse_args()
+        _Uname = args['username']
+
         try:
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.execute("select Gid, Gname from MGOUP where Default_group='N';" ) 
+
+            #유저가 엔트리나 탑으로 들어가있는 그룹들의 아이디 구하기 => 그 아이디들이 아닌 것들 컨디션으로 저장
+            cursor.execute("SELECT Gid from PARTICIPATE where Uname='" + _Uname + "';" ) 
             rv = cursor.fetchall()
-            alluser = []
-            row_headers=[x[0] for x in cursor.description] 
+            condition_str = ""
+            for i in rv:
+                condition_str += " and Gid <> " + str(i[0])
+            condition_str = condition_str[4:]
+
+            #이미 있는 그룹과 디폴트인 그룹을 제외한 그룹들에서 오너, 그룹아이디, 그룹 이름 가져오기
+            cursor.execute("SELECT Gid, Gname, Owner_uname from MGROUP where " + condition_str + ";" ) 
             rv = cursor.fetchall()
-            json_data=[]
-            for result in rv:
-                json_data.append(dict(zip(row_headers,result)))
+            result = []
+            for i in rv:
+                _Owner = i[2]
+                _Gname = i[1]
+                _Gid = i[0]
+                
+                #필요한 그룹의 엔트리들 가져오기
+                cursor.execute("SELECT Uname from PARTICIPATE where Gid = " + str(_Gid) + " and Uname <> " + _Owner + ";" ) 
+                entries = cursor.fetchall()
+                _Entries = []
+                for j in entries:
+                    _Entries.append({'username' : j[0]})
+
+                json_data = { "ownername" : _Owner,\
+                        "groupname" : _Gname,\
+                        "groupid" : _Gid,\
+                        "entries" : _Entries }
+
+            
+
+
+
+
+            
             return Response(str(json_data).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
