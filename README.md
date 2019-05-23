@@ -13,7 +13,9 @@ cs360 in 2019 spring
 2. virtualenv ==> https://virtualenv.pypa.io/en/latest/
 3. Flask ==> 터미널에 $ pip3 install Flask
 4. PyMySQL ==> $ pip3 install PyMySQL
-
+<br/>
+<br/>
+<br/>
 
 ## 서버 실행
 1. make database <br/>
@@ -21,6 +23,9 @@ mysql 연결 후 source app/schema/makeMansheet.sql 실행
 
 2. 서버 API 실행<br/>
 python3 newvenv/api.py.   ~~run file 아님~~
+<br/>
+<br/>
+<br/>
 
 ## Installation
 실행 시에 아래 에러들 뜨면 추가로 설치해주기
@@ -47,6 +52,11 @@ pip3 install flask
 @ModuleNotFoundError: No mpodule named 'flask_cors'<br/>
 pip3 install flask_cors
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 # API : JSON in Body, 127.0.0.1:5000
 ## 회원가입 /user [POST] 
@@ -84,6 +94,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
+<br/>
+<br/>
 
 ## 탈퇴 /user [DELETE] 
 ```json
@@ -112,6 +124,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
+<br/>
+<br/>
 
 
 ## 로그인 /user [PATCH] 
@@ -143,6 +157,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+<br/>
+<br/>
 
 
 
@@ -179,13 +195,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"groupid" : 00,
 	"schedules" : [
         {
-        	"Sid" : 00,
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Duration" : 60,
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
+        	"sid" : 00
+            "start_date": "2019-05-20",
+            "start_time": "20:00",
+            "duration" : 00,
+            "description": "안녕",
+            "username": "00hi",
+            "groupid": 00,
+            "groupname" : "test"
         },
         ,,, "엔트리와 탑의 모든 일정들, 그룹의 일정들"
     ],
@@ -197,6 +214,82 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
     ]
 }
 ```
+
+<br/>
+<br/>
+
+## 그룹 정보 /group [PATCH] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 200
+```json
+====output====
+{
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+        	"sid" : 00
+            "start_date": "2019-05-20",
+            "start_time": "20:00",
+            "duration" : 00,
+            "description": "안녕",
+            "username": "00hi",
+            "groupid": 00,
+            "groupname" : "test"
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
+
+
+<br/>
+<br/>
+
+
+## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
+```json
+====input====
+{
+	"username" : "유저 이름"
+}
+```
+#### Ressponse status 200
+
+유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
+
+```json
+====output====
+[
+	{
+		"ownername" : "아이디",
+		"groupname" : "그룹 이름",
+		"groupid" : "그룹 아이디",
+	    "entries" : [
+	    	{
+	    		"username" : "탑을 제외한 엔트리의 아이디"
+	    	},
+	    	,,,
+	    ]
+	},
+	,,,
+]
+```
+
+
+<br/>
+<br/>
 
 
 ## 모든 유저의 간략한 정보 /alluser [PATCH] 
@@ -216,6 +309,9 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	,,,
 ]
 ```
+
+<br/>
+<br/>
 
 
 ## 스케쥴 정보 /schedule [POST]
@@ -239,6 +335,11 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+
+<br/>
+<br/>
+
+
 ## 스케쥴 정보 /schedule [Patch]
 ```json
 ====input====
@@ -261,6 +362,12 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
     "message": "Message"
 }
 ```
+
+
+<br/>
+<br/>
+
+
 
 ## 스케쥴 정보 /schedule [DELETE]
 ```json
@@ -289,6 +396,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 
 
@@ -301,38 +416,6 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 ## 하는중인거
 
-## 그룹 정보 /group [PATCH] 
-```json
-====input====
-{
-	"groupname" : "그룹 이름"
-}
-```
-#### Ressponse status 200
-```json
-====output====
-{
-	"ownername" : "아이디",
-	"groupname" : "그룹 이름",
-	"schedules" : [
-        {
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
-        },
-        ,,,
-    ],
-    "entries" : [
-    	{
-    		"username" : "아이디"
-    	},
-    	,,,
-    ]
-}
-```
-
 
 ## 그룹 정보 /group [DELETE] 
 ```json
@@ -342,6 +425,18 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"username" : "현재 로그인된 유저 이름"
 }
 ```
+#### Ressponse status 406
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+존재하지 않는 이름의 그룹인 경우<br/>
+그룹의 오너가 아닌 유저가 삭제를 시도하는 경우 <br/>
+유저의 디폴트 그룹(개인 일정)을 삭제하려 시도하는 경우 <br/>
+
+
 #### Ressponse status 200
 ```json
 ====output====
@@ -351,30 +446,4 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
-## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
-```json
-====input====
-{
-	"username" : "유저 이름"
-}
-```
-#### Ressponse status 200
-```json
-====output====
-[
-	{
-		"ownername" : "아이디",
-		"groupname" : "그룹 이름",
-		"groupid" : "그룹 아이디",
-	    "entries" : [
-	    	{
-	    		"username" : "탑을 제외한 엔트리의 아이디"
-	    	},
-	    	,,,
-	    ]
-	},
-	,,,
-]
-```
-유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
 

@@ -219,10 +219,14 @@ class GROUP(Resource):
                 condition_str += add_str + _Uname + "'"
                 sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
                 cursor.execute(sql)
-                row_headers=[x[0] for x in cursor.description]
+                row_headers=('sid', 'start_date', 'start_time', 'duration', 'description', 'username', 'groupid')
                 schedules = cursor.fetchall()
                 for one in schedules:
-                    json_schedules.append(dict(zip(row_headers,one)))
+                    cursor.execute("SELECT Gname FROM MGROUP WHERE Gid = " + str(one[6]) + ";")
+                    tempGname = cursor.fetchone()[0]
+                    tempJson = dict(zip(row_headers,one))
+                    tempJson.update({'groupname': tempGname})
+                    json_schedules.append(tempJson)
 
                 res = {'message': "Group created successfully.", \
                         'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
@@ -277,11 +281,15 @@ class GROUP(Resource):
             condition_str += add_str + _Owner + "'"
             sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
             cursor.execute(sql)
-            row_headers=[x[0] for x in cursor.description]
+            row_headers=('sid', 'start_date', 'start_time', 'duration', 'description', 'username', 'groupid')
             _Schedules = []
             schedules = cursor.fetchall()
             for one in schedules:
-                _Schedules.append(dict(zip(row_headers,one)))
+                cursor.execute("SELECT Gname FROM MGROUP WHERE Gid = " + str(one[6]) + ";")
+                tempGname = cursor.fetchone()[0]
+                tempJson = dict(zip(row_headers,one))
+                tempJson.update({'groupname': tempGname})
+                _Schedules.append(tempJson)
 
             #결과 정리
             result = {
@@ -318,15 +326,20 @@ class GROUP(Resource):
             #이미 있는 유저의 그룹인지 확인
             conn = mysql.connect()
             cursor = conn.cursor()
-            sql = """select * from MGROUP where Owner_uname = '""" + _Uname + """' AND Gname = '"""+ _Gname +"""' ;"""
+            sql = """select * from MGROUP where Gname = '"""+ _Gname +"""' ;"""
             cursor.execute(sql)
             existing = cursor.fetchone()
 
-            if (existing is None): #존재하지 않는 아이디인 경우
+            if (existing is None): #존재하지 않는 그룹인 경우
                 return bad406Response("Group of that name does not exists")
-                
+            if (_Uname != existing[3]): #그룹의 오너와 다른 아이디인 경우
+                return bad406Response("You are not the TOP of this group")
+            if ('Y' == existing[2]): #디폴트 그룹을 지우려 하는 경우
+                return bad406Response("You can not delete default group.")
+
             #그룹 삭제 프로시져 실행
-            args = [existing[0], 0]
+            _Gid = existing[0]
+            args = [_Gid, 0]
             cursor.callproc('deleteMuser', args)
             cursor.execute('SELECT @_deleteMuser_1') 
             result = cursor.fetchone()
@@ -429,22 +442,24 @@ class SCHEDULE(Resource):
     #create 후 sid 만들기   
     def post(self):
          # POST = 1
-         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('start_date', type=str)
-            parser.add_argument('start_time', type=str)
-            parser.add_argument('username', type=str)
-            parser.add_argument('groupname',type=str)
-            parser.add_argument('description', type=str)
-            parser.add_argument('duration', type=str)
-            args = parser.parse_args()
 
-            _startDate = args['start_date']
-            _startTime = args['start_time']
-            _Gname = args['groupname']
-            _Uname = args['username']
-            _Description = args['description'] or ''
-            _Duration = args['duration']
+        parser = reqparse.RequestParser()
+        parser.add_argument('start_date', type=str)
+        parser.add_argument('start_time', type=str)
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname',type=str)
+        parser.add_argument('description', type=str)
+        parser.add_argument('duration', type=str)
+        args = parser.parse_args()
+
+        _startDate = args['start_date']
+        _startTime = args['start_time']
+        _Gname = args['groupname']
+        _Uname = args['username']
+        _Description = args['description'] or ''
+        _Duration = args['duration']
+
+        try:
 
             #StartTime 길이 확인
             if (len(_startDate)<1) or (len(_startDate)>10):
@@ -468,11 +483,11 @@ class SCHEDULE(Resource):
             res = {'message': "schedule created successfully."}
             return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
 
-         except Exception as e :
+        except Exception as e :
             print(e)
             return error400Response(str(e))
 
-         finally:
+        finally:
             cursor.close()
             conn.close()
     #update 시간표. Description 바꾸기
