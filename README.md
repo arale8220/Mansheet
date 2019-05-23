@@ -198,6 +198,66 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+## 그룹 정보 /group [PATCH] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 200
+```json
+====output====
+{
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
+
+## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
+```json
+====input====
+{
+	"username" : "유저 이름"
+}
+```
+#### Ressponse status 200
+
+유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
+
+```json
+====output====
+[
+	{
+		"ownername" : "아이디",
+		"groupname" : "그룹 이름",
+		"groupid" : "그룹 아이디",
+	    "entries" : [
+	    	{
+	    		"username" : "탑을 제외한 엔트리의 아이디"
+	    	},
+	    	,,,
+	    ]
+	},
+	,,,
+]
+```
 
 ## 모든 유저의 간략한 정보 /alluser [PATCH] 
 ```json
@@ -301,38 +361,6 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 ## 하는중인거
 
-## 그룹 정보 /group [PATCH] 
-```json
-====input====
-{
-	"groupname" : "그룹 이름"
-}
-```
-#### Ressponse status 200
-```json
-====output====
-{
-	"ownername" : "아이디",
-	"groupname" : "그룹 이름",
-	"schedules" : [
-        {
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
-        },
-        ,,,
-    ],
-    "entries" : [
-    	{
-    		"username" : "아이디"
-    	},
-    	,,,
-    ]
-}
-```
-
 
 ## 그룹 정보 /group [DELETE] 
 ```json
@@ -351,30 +379,4 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
-## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
-```json
-====input====
-{
-	"username" : "유저 이름"
-}
-```
-#### Ressponse status 200
-```json
-====output====
-[
-	{
-		"ownername" : "아이디",
-		"groupname" : "그룹 이름",
-		"groupid" : "그룹 아이디",
-	    "entries" : [
-	    	{
-	    		"username" : "탑을 제외한 엔트리의 아이디"
-	    	},
-	    	,,,
-	    ]
-	},
-	,,,
-]
-```
-유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
 
