@@ -384,10 +384,9 @@ class ALLGROUOP(Resource):
             #유저가 엔트리나 탑으로 들어가있는 그룹들의 아이디 구하기 => 그 아이디들이 아닌 것들 컨디션으로 저장
             cursor.execute("SELECT Gid from PARTICIPATE where Uname='" + _Uname + "';" ) 
             rv = cursor.fetchall()
-            condition_str = ""
+            condition_str = "Default_group = 'N'"
             for i in rv:
                 condition_str += " and Gid <> " + str(i[0])
-            condition_str = condition_str[4:]
 
             #이미 있는 그룹과 디폴트인 그룹을 제외한 그룹들에서 오너, 그룹아이디, 그룹 이름 가져오기
             cursor.execute("SELECT Gid, Gname, Owner_uname from MGROUP where " + condition_str + ";" ) 
@@ -409,14 +408,9 @@ class ALLGROUOP(Resource):
                         "groupname" : _Gname,\
                         "groupid" : _Gid,\
                         "entries" : _Entries }
+                result.append(json_data)
 
-            
-
-
-
-
-            
-            return Response(str(json_data).replace("'", "\""), status=200, mimetype='application/json')
+            return Response(str(result).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
             return error400Response(str(e))
