@@ -397,7 +397,6 @@ class SCHEDULE(Resource):
             parser.add_argument('groupname',type=str)
             parser.add_argument('description', type=str)
             parser.add_argument('duration', type=str)
-            parser.add_argument('sid', type=str)
             args = parser.parse_args()
 
             _startDate = args['start_date']
@@ -406,7 +405,6 @@ class SCHEDULE(Resource):
             _Uname = args['username']
             _Description = args['description'] or ''
             _Duration = args['duration']
-            # _Sid= args['sid']
 
             #StartTime 길이 확인
             if (len(_startDate)<1) or (len(_startDate)>10):
@@ -423,16 +421,6 @@ class SCHEDULE(Resource):
                     VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
             cursor.execute(sql)
             conn.commit()
-
-            #유저와 그룹 관계 추가
-            # sql = """SELECT last_insert_id();"""
-            # cursor.execute(sql)
-            # last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
-            # sql = """INSERT INTO PARTICIPATE 
-            #         VALUES ( '""" + _Uname + """' ,
-            #                 """ + str(last_insert_id) + """);"""
-            # cursor.execute(sql)
-            # conn.commit()
 
             res = {'message': "schedule created successfully."}
             return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
@@ -496,29 +484,15 @@ class SCHEDULE(Resource):
         finally:
             cursor.close()
             conn.close()
-    # 데이터 받아오기
-    def get(self):
-        GET = 1
+
     # 데이터 지우기
     def delete(self):
         try:
             #과연 다른 정보들이 필요한가? Sid만 주면 안되남
             parser = reqparse.RequestParser()
-            parser.add_argument('start_date', type=str)
-            parser.add_argument('start_time', type=str)
-            parser.add_argument('username', type=str)
-            parser.add_argument('groupname',type=str)
-            parser.add_argument('description', type=str)
-            parser.add_argument('duration', type=str)
             parser.add_argument('sid', type=str)
             args = parser.parse_args()
 
-            _startDate = args['start_date']
-            _startTime = args['start_time']
-            _Gname = args['groupname']
-            _Uname = args['username']
-            _Description = args['description'] or ''
-            _Duration = args['duration']
             _Sid= args['sid']
 
             #그룹 추가
@@ -527,7 +501,7 @@ class SCHEDULE(Resource):
             cursor.execute("""select * from SCHEDULE where Sid = '""" + str(_Sid) + """';""" ) 
             fetchSid = cursor.fetchone()
 
-            if (fetchSid[0]):
+            if fetchSid:
                 sql = """DELETE FROM SCHEDULE where Sid = '""" + str(_Sid) + """';"""
             else :
                 res = {'message': "schedule does not exists "}
