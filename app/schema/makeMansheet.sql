@@ -132,24 +132,6 @@ END $$
 
 
 DROP PROCEDURE IF EXISTS getMgroup $$ 
-CREATE PROCEDURE getMgroup(
-    IN  _Gid      VARCHAR(30),
-    OUT RESULT      INT,
-    OUT Gid         INT
-)
-BEGIN
-    DECLARE exit handler for SQLEXCEPTION
-    BEGIN
-        ROLLBACK;        
-        SET RESULT = 0;  
-    END;
-    START TRANSACTION;
-        DELETE FROM SCHEDULE WHERE Gid=_Gid;
-        DELETE FROM PARTICIPATE WHERE Gid=_Gid;
-        DELETE FROM MGROUP WHERE Gid=_Gid;
-    COMMIT;
-    SET RESULT = 1;
-END $$
 
 DELIMITER ;
 

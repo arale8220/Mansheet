@@ -114,7 +114,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
-## 로그인 /user [GET] 
+## 로그인 /user [PATCH] 
 ```json
 ====input====
 {
@@ -139,17 +139,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"message" : "Message",
 	"username" : "아이디",
 	"password" : "비밀번호",
-	"schedules" : [
-        {
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Duration" : 60,
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
-        },
-        ,,,"디폴트 그룹의 일정들. 디폴트 말고 유저가 들어있는 모든 일정들을 줘야 할까?"
-    ]
+	"defaultgid" : 00
 }
 ```
 
@@ -179,15 +169,17 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 #### Ressponse status 201 with "Message"
-성공적으로 로그인된 경우
+성공적으로 그룹을 만든 경우
 ```json
 ====output====
 {
 	"message" : "Message",
 	"ownername" : "아이디",
 	"groupname" : "그룹 이름",
+	"groupid" : 00,
 	"schedules" : [
         {
+        	"Sid" : 00,
             "Start_date": "2019-05-20",
             "Start_time": "20:00",
             "Duration" : 60,
@@ -207,37 +199,22 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
-## 그룹 정보 /group [POST] ==>하는중
+## 모든 유저의 간략한 정보 /alluser [PATCH] 
 ```json
 ====input====
 {
-	"groupname" : "그룹 이름"
+	"username" : "유저 이름"
 }
 ```
 #### Ressponse status 200
-성공적으로 로그인된 경우
 ```json
 ====output====
-{
-	"ownername" : "아이디",
-	"groupname" : "그룹 이름",
-	"schedules" : [
-        {
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
-        },
-        ,,,
-    ],
-    "entries" : [
-    	{
-    		"username" : "아이디"
-    	},
-    	,,,
-    ]
-}
+[
+	{
+		"username" : "인풋으로 준 유저를 제외한 모든 유저"
+	},
+	,,,
+]
 ```
 
 
@@ -300,4 +277,104 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
     "message": "Message"
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 하는중인거
+
+## 그룹 정보 /group [PATCH] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 200
+```json
+====output====
+{
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
+
+
+## 그룹 정보 /group [DELETE] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름",
+	"username" : "현재 로그인된 유저 이름"
+}
+```
+#### Ressponse status 200
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+
+
+## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
+```json
+====input====
+{
+	"username" : "유저 이름"
+}
+```
+#### Ressponse status 200
+```json
+====output====
+[
+	{
+		"ownername" : "아이디",
+		"groupname" : "그룹 이름",
+		"groupid" : "그룹 아이디",
+	    "entries" : [
+	    	{
+	    		"username" : "탑을 제외한 엔트리의 아이디"
+	    	},
+	    	,,,
+	    ]
+	},
+	,,,
+]
+```
+유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
 
