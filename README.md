@@ -13,7 +13,9 @@ cs360 in 2019 spring
 2. virtualenv ==> https://virtualenv.pypa.io/en/latest/
 3. Flask ==> 터미널에 $ pip3 install Flask
 4. PyMySQL ==> $ pip3 install PyMySQL
-
+<br/>
+<br/>
+<br/>
 
 ## 서버 실행
 1. make database <br/>
@@ -21,6 +23,9 @@ mysql 연결 후 source app/schema/makeMansheet.sql 실행
 
 2. 서버 API 실행<br/>
 python3 newvenv/api.py.   ~~run file 아님~~
+<br/>
+<br/>
+<br/>
 
 ## Installation
 실행 시에 아래 에러들 뜨면 추가로 설치해주기
@@ -47,6 +52,11 @@ pip3 install flask
 @ModuleNotFoundError: No mpodule named 'flask_cors'<br/>
 pip3 install flask_cors
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 # API : JSON in Body, 127.0.0.1:5000
 ## 회원가입 /user [POST] 
@@ -84,6 +94,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
+<br/>
+<br/>
 
 ## 탈퇴 /user [DELETE] 
 ```json
@@ -112,6 +124,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
+<br/>
+<br/>
 
 
 ## 로그인 /user [PATCH] 
@@ -143,6 +157,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+<br/>
+<br/>
 
 
 
@@ -198,6 +214,9 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+<br/>
+<br/>
+
 ## 그룹 정보 /group [PATCH] 
 ```json
 ====input====
@@ -230,6 +249,11 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+
+<br/>
+<br/>
+
+
 ## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
 ```json
 ====input====
@@ -259,6 +283,11 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ]
 ```
 
+
+<br/>
+<br/>
+
+
 ## 모든 유저의 간략한 정보 /alluser [PATCH] 
 ```json
 ====input====
@@ -276,6 +305,9 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	,,,
 ]
 ```
+
+<br/>
+<br/>
 
 
 ## 스케쥴 정보 /schedule [POST]
@@ -299,6 +331,11 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 }
 ```
 
+
+<br/>
+<br/>
+
+
 ## 스케쥴 정보 /schedule [Patch]
 ```json
 ====input====
@@ -321,6 +358,12 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
     "message": "Message"
 }
 ```
+
+
+<br/>
+<br/>
+
+
 
 ## 스케쥴 정보 /schedule [DELETE]
 ```json
@@ -349,6 +392,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 
 
