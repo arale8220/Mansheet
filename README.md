@@ -258,7 +258,7 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 <br/>
 
 
-## 모든 그룹의 간략한 정보 /allgroup [PATCH] 
+## 자신 제외 그룹의 간략한 정보 /allgroup [PATCH] 
 ```json
 ====input====
 {
@@ -268,6 +268,36 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 #### Ressponse status 200
 
 유저가 속해있지 않고, 디폴트 그룹(개인 일정)이 아닌 그룹들만 반환
+
+```json
+====output====
+[
+	{
+		"ownername" : "아이디",
+		"groupname" : "그룹 이름",
+		"groupid" : "그룹 아이디",
+	    "entries" : [
+	    	{
+	    		"username" : "탑을 제외한 엔트리의 아이디"
+	    	},
+	    	,,,
+	    ]
+	},
+	,,,
+]
+```
+
+
+## 자신의 그룹의 간략한 정보 /allgroup [POST] 
+```json
+====input====
+{
+	"username" : "유저 이름"
+}
+```
+#### Ressponse status 200
+
+유저가 속해있는 그룹들을 디폴트 크룹까지 포함하여 반환
 
 ```json
 ====output====
@@ -386,36 +416,8 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
-
-
-
-
-
-
-
-
-
-
 <br/>
 <br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-
-
-
-
-
-
-
-
-
-
-## 하는중인거
-
 
 ## 그룹 정보 /group [DELETE] 
 ```json

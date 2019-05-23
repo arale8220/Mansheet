@@ -20,7 +20,7 @@ mysql.init_app(app)
 
 
 class USER(Resource):
-    
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -114,7 +114,7 @@ class USER(Resource):
 
         return error400Response("Check the json data you send.")
     
-    
+
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -173,7 +173,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
 
 class GROUP(Resource):
-    
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -357,7 +357,7 @@ class GROUP(Resource):
 
 
 class ALLUSER(Resource):
-    
+
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -383,7 +383,7 @@ class ALLUSER(Resource):
             conn.close()
 
 class ALLGROUOP(Resource):
-    
+
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -432,15 +432,90 @@ class ALLGROUOP(Resource):
             cursor.close()
             conn.close()
 
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        args = parser.parse_args()
+        _Uname = args['username']
 
-# mysql> insert into muser (uname, password) values ("13dd", "1234");
-# mysql> insert into mgroup (gname, owner_uname) Values ("2-on", "13dd");
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT Gid from PARTICIPATE where Uname='" + _Uname + "';" ) 
+            rv = cursor.fetchall()
+
+            condition_str = ""
+            for i in rv:
+                condition_str += " or Gid = " + str(i[0])
+            condition_str = condition_str[4:]
+
+            #이미 있는 그룹과 디폴트인 그룹을 제외한 그룹들에서 오너, 그룹아이디, 그룹 이름 가져오기
+            cursor.execute("SELECT Gid, Gname, Owner_uname from MGROUP where " + condition_str + ";" ) 
+            rv = cursor.fetchall()
+            result = []
+            for i in rv:
+                _Owner = i[2]
+                _Gname = i[1]
+                _Gid = i[0]
+                
+                #필요한 그룹의 엔트리들 가져오기
+                cursor.execute("SELECT Uname from PARTICIPATE where Gid = " + str(_Gid) + " and Uname <> '" + _Owner + "';" ) 
+                entries = cursor.fetchall()
+                _Entries = []
+                for j in entries:
+                    _Entries.append({'username' : j[0]})
+
+                json_data = { "ownername" : _Owner,\
+                        "groupname" : _Gname,\
+                        "groupid" : _Gid,\
+                        "entries" : _Entries }
+                result.append(json_data)
+
+            return Response(str(result).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
+class JOIN(Resource):
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname', type=str)
+        args = parser.parse_args()
+        _Uname = args['username']
+        _Gname = args['groupname']
+
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("SELECT Gid from MGROUP where Gname='" + _Gname + "' and Default_group='N' ;" ) 
+            res = cursor.fetchone()
+
+            if (res is None):
+                return bad406Response("The group that you can join is not exist. \nIf not, the group is defautl group of other user.")
+
+            _Gid = res[0]
+            cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + _Uname + "', " + _Gid + ");" ) 
+            return Response(str({'message' : "User joined into group successfully."}).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
 
 
 class SCHEDULE(Resource):
     #post -> 데이터 만들기
     #create 후 sid 만들기   
-    
+
     def post(self):
          # POST = 1
 
@@ -493,28 +568,29 @@ class SCHEDULE(Resource):
             conn.close()
 
     #update 시간표. Description 바꾸기
-    
+
     def patch(self):
+
+        #과연 다른 정보들이 필요한가? Sid만 주면 안되남
+        parser = reqparse.RequestParser()
+        parser.add_argument('start_date', type=str)
+        parser.add_argument('start_time', type=str)
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname',type=str)
+        parser.add_argument('description', type=str)
+        parser.add_argument('duration', type=str)
+        parser.add_argument('sid', type=str)
+        args = parser.parse_args()
+
+        _startDate = args['start_date']
+        _startTime = args['start_time']
+        _Gname = args['groupname']
+        _Uname = args['username']
+        _Description = args['description'] or ''
+        _Duration = args['duration']
+        _Sid= args['sid']
+
         try:
-            #과연 다른 정보들이 필요한가? Sid만 주면 안되남
-            parser = reqparse.RequestParser()
-            parser.add_argument('start_date', type=str)
-            parser.add_argument('start_time', type=str)
-            parser.add_argument('username', type=str)
-            parser.add_argument('groupname',type=str)
-            parser.add_argument('description', type=str)
-            parser.add_argument('duration', type=str)
-            parser.add_argument('sid', type=str)
-            args = parser.parse_args()
-
-            _startDate = args['start_date']
-            _startTime = args['start_time']
-            _Gname = args['groupname']
-            _Uname = args['username']
-            _Description = args['description'] or ''
-            _Duration = args['duration']
-            _Sid= args['sid']
-
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
@@ -546,16 +622,17 @@ class SCHEDULE(Resource):
             conn.close()
 
     # 데이터 지우기
-    
+
     def delete(self):
+        #과연 다른 정보들이 필요한가? Sid만 주면 안되남
+        parser = reqparse.RequestParser()
+        parser.add_argument('sid', type=str)
+        args = parser.parse_args()
+
+        _Sid= args['sid']
+
         try:
-            #과연 다른 정보들이 필요한가? Sid만 주면 안되남
-            parser = reqparse.RequestParser()
-            parser.add_argument('sid', type=str)
-            args = parser.parse_args()
-
-            _Sid= args['sid']
-
+        
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
@@ -586,6 +663,7 @@ api.add_resource(GROUP, '/group')
 api.add_resource(ALLUSER, '/allusers')
 api.add_resource(ALLGROUOP, '/allgroups')
 api.add_resource(SCHEDULE, '/schedule')
+api.add_resource(JOIN, '/join')
 
 
 def bad406Response(msg):
