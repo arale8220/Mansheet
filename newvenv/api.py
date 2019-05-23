@@ -263,7 +263,7 @@ class GROUP(Resource):
 
             #그룹 엔트리 가져오기
             sql = """SELECT Uname FROM PARTICIPATE WHERE Gid = """ + str(_Gid) + \
-                    """ and Uname <> """ + _Owner + """;"""
+                    """ and Uname <> '""" + _Owner + """';"""
             cursor.execute(sql)
             _Entries = []
             condition_str = "Gid = " + str(_Gid)
@@ -285,7 +285,7 @@ class GROUP(Resource):
 
             #결과 정리
             result = {
-                        "message" : "Goup informatino fetched.",
+                        "message" : "Group information fetched.",
                         "ownername" : _Owner,
                         "groupname" : _Gname,
                         "groupid" : _Gid,
@@ -399,7 +399,7 @@ class ALLGROUOP(Resource):
                 _Gid = i[0]
                 
                 #필요한 그룹의 엔트리들 가져오기
-                cursor.execute("SELECT Uname from PARTICIPATE where Gid = " + str(_Gid) + " and Uname <> " + _Owner + ";" ) 
+                cursor.execute("SELECT Uname from PARTICIPATE where Gid = " + str(_Gid) + " and Uname <> '" + _Owner + "';" ) 
                 entries = cursor.fetchall()
                 _Entries = []
                 for j in entries:
