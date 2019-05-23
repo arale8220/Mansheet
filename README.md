@@ -48,7 +48,6 @@ pip3 install flask
 pip3 install flask_cors
 
 
-
 # API : JSON in Body, 127.0.0.1:5000
 ## 회원가입 /user [POST] 
 body json input
@@ -144,11 +143,12 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
         {
             "Start_date": "2019-05-20",
             "Start_time": "20:00",
+            "Duration" : 60,
             "Description": "안녕",
             "Uname": "00hi",
             "Gid": 1
         },
-        ,,,
+        ,,,"디폴트 그룹의 일정들. 디폴트 말고 유저가 들어있는 모든 일정들을 줘야 할까?"
     ]
 }
 ```
@@ -156,13 +156,148 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
+## 그룹 생성 /group [POST] 
+```json
+====input====
+{
+	"username" : "아이디",
+	"groupname" : "그룹 이름",
+	"entries" : [
+		{"username" : "탑을 제외한 엔트리 이름"},
+		,,,
+	]
+}
+```
+#### Ressponse status 406 with "Message"
+그룹 이름의 길이가 1글자보다 짧은 경우<br/>
+그룹 이름의 길이가 30글자보다 긴 경우<br/>
+이미 같은 이름의 그룹이 존재하는 경우<br/>
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+#### Ressponse status 201 with "Message"
+성공적으로 로그인된 경우
+```json
+====output====
+{
+	"message" : "Message",
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Duration" : 60,
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,, "엔트리와 탑의 모든 일정들, 그룹의 일정들"
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,, "탑을 제외한 엔트리의 이름"
+    ]
+}
+```
 
 
+## 그룹 정보 /group [POST] ==>하는중
+```json
+====input====
+{
+	"groupname" : "그룹 이름"
+}
+```
+#### Ressponse status 200
+성공적으로 로그인된 경우
+```json
+====output====
+{
+	"ownername" : "아이디",
+	"groupname" : "그룹 이름",
+	"schedules" : [
+        {
+            "Start_date": "2019-05-20",
+            "Start_time": "20:00",
+            "Description": "안녕",
+            "Uname": "00hi",
+            "Gid": 1
+        },
+        ,,,
+    ],
+    "entries" : [
+    	{
+    		"username" : "아이디"
+    	},
+    	,,,
+    ]
+}
+```
 
 
+## 스케쥴 정보 /schedule [POST]
+```json
+====input====
+{
+    "groupname": "Group Name",
+    "username": "User Name",
+    "start_date": "0000-00-00",
+    "start_time": "00:00",
+    "duration": 60,
+    "description": "description this can be none"
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 등록된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 
+## 스케쥴 정보 /schedule [Patch]
+```json
+====input====
+{
+    "sid" : "target schedule sid which will be deleted",
+    # below this is used to change schedule
+    "start_date" : "start_date",
+    "start_time" : "start_time",
+    "username" : "username",
+    "groupname" : "groupname",
+    "description" : "description",
+    "duration" : ""
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 변경된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 
-
-
-
+## 스케쥴 정보 /schedule [DELETE]
+```json
+====input====
+{
+    "sid":"sid"
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 삭제된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 

@@ -19,37 +19,36 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
 
-class User(Resource):
+class USER(Resource):
     @cross_origin()
     def post(self):
-        try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str)
-            parser.add_argument('password', type=str)
-            args = parser.parse_args()
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('password', type=str)
+        args = parser.parse_args()
 
-            _Uname = args['username']
-            _Password = args['password']
-
-            #닉네임 형식 확인
-            if (len(_Uname)<4) or (not (_Uname[0:2].isdigit())) or (len(_Uname)>10) or (_Uname[2].isspace()) :
-                return user406Response("Please check your nickname. \nFirst two character must be digit. \nDo not write off digits and nickname.\nNickname must be less than 10 characters")
-                
-            #비밀번호가 너무 짧거나 길지 않은지 확인
-            if (len(_Password)<4) :
-                return user406Response("Password is too short. It must be longer than 4 characters")
-            if (len(_Password)>40) :
-                return user406Response("Password is too long. It must be less than 40 characters")
+        _Uname = args['username']
+        _Password = args['password']
+        #닉네임 형식 확인
+        if (len(_Uname)<4) or (not (_Uname[0:2].isdigit())) or (len(_Uname)>10) or (_Uname[2].isspace()) :
+            return bad406Response("Please check your nickname. \nFirst two character must be digit. \nDo not write off digits and nickname.\nNickname must be less than 10 characters")
             
-
-            #이미 있는 유저의 아이디인지 확인
+        #비밀번호가 너무 짧거나 길지 않은지 확인
+        if (len(_Password)<4) :
+            return bad406Response("Password is too short. It must be longer than 4 characters")
+        if (len(_Password)>40) :
+            return bad406Response("Password is too long. It must be less than 40 characters")
+        
+        try:
             conn = mysql.connect()
             cursor = conn.cursor()
+
+            #이미 있는 유저의 아이디인지 확인
             sql = """select exists (select 1 from MUSER where Uname = '""" + _Uname + """');"""
             cursor.execute(sql)
             already = cursor.fetchone()[0]
             if already :
-                return user406Response("User already exists")
+                return bad406Response("User already exists")
 
             #유저 추가 프로시져 실행
             args = (_Uname, _Password, 0)
@@ -69,17 +68,20 @@ class User(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
+
     @cross_origin()
     def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('password', type=str)
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Password = args['password']
+
         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str)
-            parser.add_argument('password', type=str)
-            args = parser.parse_args()
-
-            _Uname = args['username']
-            _Password = args['password']
-
             #이미 있는 유저의 아이디인지 확인
             conn = mysql.connect()
             cursor = conn.cursor()
@@ -88,9 +90,9 @@ class User(Resource):
             existing = cursor.fetchone()
 
             if (existing is None): #존재하지 않는 아이디인 경우
-                return user406Response("User does not exists")    
+                return bad406Response("User does not exists")    
             if existing[1] != _Password: #옳지 않은 비밀번호를 입력한 경우
-                return user406Response("Please enter right password for secession")
+                return bad406Response("Please enter right password for secession")
                 
             #유저 삭제 프로시져 실행
             args = [_Uname, _Password, 0]
@@ -109,18 +111,20 @@ class User(Resource):
         finally:
             cursor.close()
             conn.close()
+
+        return error400Response("Check the json data you send.")
     
     @cross_origin()
-    def get(self):
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('password', type=str)
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Password = args['password']
+
         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str)
-            parser.add_argument('password', type=str)
-            args = parser.parse_args()
-
-            _Uname = args['username']
-            _Password = args['password']
-
             #이미 있는 유저의 아이디인지 확인
             conn = mysql.connect()
             cursor = conn.cursor()
@@ -129,9 +133,9 @@ class User(Resource):
             existing = cursor.fetchone()
 
             if (existing is None): #존재하지 않는 아이디인 경우
-                return user406Response("User does not exists")    
+                return bad406Response("User does not exists")    
             if existing[1] != _Password: #옳지 않은 비밀번호를 입력한 경우
-                return user406Response("Please enter right password for secession")
+                return bad406Response("Please enter right password for secession")
             
             #로그인 된 유저의 디폴트 그룹의 GID 가져오기
             conn = mysql.connect()
@@ -157,49 +161,68 @@ class User(Resource):
             return Response(str(res).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
+            print(e)
             return error400Response(str(e))
 
         finally:
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
 class GROUP(Resource):
-
+    @cross_origin()
     def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname', type=str)
+        parser.add_argument('entries', action='append')
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Gname = args['groupname']
+        _Entries = args['entries']
+
+        #그룹 이름 길이 확인
+        if (len(_Uname)<1):
+            return bad406Response("Group name is too short")
+        if (len(_Uname)>30):
+            return bad406Response("Group name is too long")
+        if (_Entries is None):
+            return bad406Response("There is no entries in json body")
+
         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str)
-            parser.add_argument('groupname', type=str)
-            args = parser.parse_args()
-
-            _Uname = args['username']
-            _Gname = args['groupname']
-
-            #그룹 이름 길이 확인
-            if (len(_Uname)<1) or (len(_Uname)>10):
-                res = {'message': "Group name is too short or too long"}
-                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
-
             #그룹 추가
             conn = mysql.connect()
             cursor = conn.cursor()
-            sql = """INSERT INTO MGROUP(Gname, Owner_uname) 
-                    VALUES ( '""" + _Gname + """, '""" + _Uname + """');"""
-            cursor.execute(sql)
-            conn.commit()
+            args = (_Uname, _Gname, 0, 0)
+            result_args = cursor.callproc('createMgroup', args)
+            cursor.execute('SELECT @_createMgroup_2, @_createMgroup_3') 
+            result = cursor.fetchone()
+            if result[0]:
+                json_schedules = []
+                condition_str = "Gid = " + str(result[1])
+                add_str = " or Uname = \'"
+                for i in _Entries:
+                    cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""")
+                    condition_str += add_str + i['username'] + "\'"
 
-            #유저와 그룹 관계 추가
-            sql = """SELECT last_insert_id();"""
-            cursor.execute(sql)
-            last_insert_id = cursor.fetchone()[0] #fetchone은 1차원 튜플, fetchall은 2차원
-            sql = """INSERT INTO PARTICIPATE 
-                    VALUES ( '""" + _Uname + """' ,
-                            """ + str(last_insert_id) + """);"""
-            cursor.execute(sql)
-            conn.commit()
+                sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
+                cursor.execute(sql)
+                row_headers=[x[0] for x in cursor.description]
+                schedules = cursor.fetchall()
+                for one in schedules:
+                    json_schedules.append(dict(zip(row_headers,one)))
 
-            res = {'message': "Group created successfully."}
-            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+                res = {'message': "Group created successfully.", \
+                        'ownername':_Uname, 'groupname':_Gname, \
+                        'schedules' : json_schedules, \
+                        'entries' : _Entries}
+
+                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+            
+            else:
+                return bad406Response("Please check that you already have group with same name")
 
         except Exception as e:
             return error400Response(str(e))
@@ -208,18 +231,305 @@ class GROUP(Resource):
             cursor.close()
             conn.close()
 
+        return error400Response("Check the json data you send.")
+
+    @cross_origin()
     def get(self):
-        raise NotImplementedError()
+        parser = reqparse.RequestParser()
+        parser.add_argument('groupname', type=str)
+        args = parser.parse_args()
 
+        _Gname = args['groupname']
+
+        try:
+            #그룹 id 가져오기
+            conn = mysql.connect()
+            cursor = conn.cursor()
+
+            args = [_Gname, 0, 0]
+            result_args = cursor.callproc('getMgroup', args)
+            cursor.execute('SELECT @_createMgroup_1, @_createMgroup_2') 
+            result = cursor.fetchone()
+
+            if result[0]:
+                cursor.execute("""select Uname from PARTICIPATE where Gid = '""" + result[1] + """";""" ) 
+                users = cursor.fetchall()
+                json_data = []
+                for user in users:
+                    content = {'username': user[0]}
+                    json_data.append(content)
+
+############
+
+
+                group_data = {  'groupname':_Gname,\
+                                'ownername':ownername,\
+                                'entries':json_data,\
+                                'schedules':schedules}
+                return Response(str(group_data).replace("'", "\""), status=200, mimetype='application/json')
+
+
+
+
+
+
+
+
+
+
+                res = {'message': "Group created successfully.", 'ownername':_Uname, 'groupname':_Gname}
+                for i in _Entries:
+                    cursor.execute("""INSERT INTO PARTICIPATE VALUES ('"""+i['username']+"""', """ + result[1] + """');""") 
+                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+            else:
+                return bad406Response("Please check that you already have group with same name")
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
+        return error400Response("Check the json data you send.")
+
+    @cross_origin()
     def delete(self):
-        raise NotImplementedError()
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname', type=str)
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Gname = args['groupname']
+
+        try:
+            #이미 있는 유저의 그룹인지 확인
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            sql = """select * from MGROUP where Owner_uname = '""" + _Uname + """' AND Gname = '"""+ _Gname +"""' ;"""
+            cursor.execute(sql)
+            existing = cursor.fetchone()
+
+            if (existing is None): #존재하지 않는 아이디인 경우
+                return bad406Response("Group of that name does not exists")
+                
+            #그룹 삭제 프로시져 실행
+            args = [existing[0], 0]
+            result_args = cursor.callproc('deleteMuser', args)
+            cursor.execute('SELECT @_deleteMuser_1') 
+            result = cursor.fetchone()
+            if result[0]:
+                return Response(str({'message':"Group deleted successfully."}).replace("'", "\""), status=200, mimetype='application/json')
+            else:
+                raise SQLError()
+
+        except Exception as e:
+            return error400Response(str(e))
+
+        finally:
+            cursor.close()
+            conn.close()
 
 
+class ALLUSER(Resource):
+    def get(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('username', type=str)
+            args = parser.parse_args()
+            _Uname = args['username']
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select Uname from MUSER where Uname <> '""" + _Uname + """";""" ) 
+            rv = cursor.fetchall()
+            alluser = []
+            for result in rv:
+                content = {'username': result[0]}
+                payload.append(content)
+            return Response(str(alluser).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
+class ALLGROUOP(Resource):
+    def get(self):
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("select Gid, Gname from MGOUP where Default_group='N';" ) 
+            rv = cursor.fetchall()
+            alluser = []
+            row_headers=[x[0] for x in cursor.description] 
+            rv = cursor.fetchall()
+            json_data=[]
+            for result in rv:
+                json_data.append(dict(zip(row_headers,result)))
+            return Response(str(json_data).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
+
+# mysql> insert into muser (uname, password) values ("13dd", "1234");
+# mysql> insert into mgroup (gname, owner_uname) Values ("2-on", "13dd");
+
+
+class SCHEDULE(Resource):
+    #post -> 데이터 만들기
+    #create 후 sid 만들기   
+    def post(self):
+         # POST = 1
+         try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('start_date', type=str)
+            parser.add_argument('start_time', type=str)
+            parser.add_argument('username', type=str)
+            parser.add_argument('groupname',type=str)
+            parser.add_argument('description', type=str)
+            parser.add_argument('duration', type=str)
+            args = parser.parse_args()
+
+            _startDate = args['start_date']
+            _startTime = args['start_time']
+            _Gname = args['groupname']
+            _Uname = args['username']
+            _Description = args['description'] or ''
+            _Duration = args['duration']
+
+            #StartTime 길이 확인
+            if (len(_startDate)<1) or (len(_startDate)>10):
+                res = {'message': "Start date is too short or too long"}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+
+            #그룹 추가
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select gid from MGROUP where Gname = '""" + _Gname + """';""" ) 
+            fetchGid = cursor.fetchone()
+            if fetchGid and fetchGid[0]:
+                sql = """INSERT INTO SCHEDULE(Start_date,start_time,Uname,duration, Gid, description) 
+                    VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
+            else :
+                res = {'message': "No such group exists"}
+                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+            cursor.execute(sql)
+            conn.commit()
+
+            res = {'message': "schedule created successfully."}
+            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+         except Exception as e :
+            print(e)
+            return error400Response(str(e))
+
+         finally:
+            cursor.close()
+            conn.close()
+    #update 시간표. Description 바꾸기
+    def patch(self):
+        try:
+            #과연 다른 정보들이 필요한가? Sid만 주면 안되남
+            parser = reqparse.RequestParser()
+            parser.add_argument('start_date', type=str)
+            parser.add_argument('start_time', type=str)
+            parser.add_argument('username', type=str)
+            parser.add_argument('groupname',type=str)
+            parser.add_argument('description', type=str)
+            parser.add_argument('duration', type=str)
+            parser.add_argument('sid', type=str)
+            args = parser.parse_args()
+
+            _startDate = args['start_date']
+            _startTime = args['start_time']
+            _Gname = args['groupname']
+            _Uname = args['username']
+            _Description = args['description'] or ''
+            _Duration = args['duration']
+            _Sid= args['sid']
+
+            #그룹 추가
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select Gid from SCHEDULE where Sid = '""" + str(_Sid) + """';""" ) 
+            fetchGid = cursor.fetchone()
+
+            print(fetchGid[0])
+
+            if (fetchGid[0]):
+                sql = """DELETE FROM SCHEDULE where Sid = '""" + str(_Sid) + """';"""
+            else :
+                res = {'message': "schedule does not exists "}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+            cursor.execute(sql)
+            sql = """INSERT INTO SCHEDULE(Start_date,start_time,Uname,duration, Gid, description) 
+                    VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
+            cursor.execute(sql)
+
+            conn.commit()
+            res = {'message': "schedule changed successfully."}
+            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+        except Exception as e :
+            print(e)
+            return error400Response(str(e))
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    # 데이터 지우기
+    def delete(self):
+        try:
+            #과연 다른 정보들이 필요한가? Sid만 주면 안되남
+            parser = reqparse.RequestParser()
+            parser.add_argument('sid', type=str)
+            args = parser.parse_args()
+
+            _Sid= args['sid']
+
+            #그룹 추가
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("""select * from SCHEDULE where Sid = '""" + str(_Sid) + """';""" ) 
+            fetchSid = cursor.fetchone()
+
+            if fetchSid:
+                sql = """DELETE FROM SCHEDULE where Sid = '""" + str(_Sid) + """';"""
+            else :
+                res = {'message': "schedule does not exists "}
+                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+            cursor.execute(sql)
+            conn.commit()
+            res = {'message': "schedule deleted successfully."}
+            return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
+
+        except Exception as e :
+            print(e)
+            return error400Response(str(e))
+
+        finally:
+            cursor.close()
+            conn.close()
         
 
-api.add_resource(User, '/user')
+api.add_resource(USER, '/user')
+api.add_resource(GROUP, '/group')
+api.add_resource(ALLUSER, '/alluser')
+api.add_resource(ALLGROUOP, '/allgroup')
+api.add_resource(SCHEDULE, '/schedule')
 
-def user406Response(msg):
+
+def bad406Response(msg):
     return Response(str({'message': msg}).replace("'", "\""), status=406, mimetype='application/json')
 
 def user20XResponse(msg, user, pw, state):
@@ -234,6 +544,6 @@ class SQLError(Exception):
         return "There are some problem in SQL. It has been rolled back."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('0.0.0.0', debug=True)
 
 
