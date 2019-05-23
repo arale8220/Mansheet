@@ -48,7 +48,6 @@ pip3 install flask
 pip3 install flask_cors
 
 
-
 # API : JSON in Body, 127.0.0.1:5000
 ## 회원가입 /user [POST] 
 body json input
@@ -242,15 +241,63 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 ```
 
 
+## 스케쥴 정보 /schedule [POST]
+```json
+====input====
+{
+    "groupname": "Group Name",
+    "username": "User Name",
+    "start_date": "0000-00-00",
+    "start_time": "00:00",
+    "duration": 60,
+    "description": "description this can be none"
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 등록된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 
+## 스케쥴 정보 /schedule [Patch]
+```json
+====input====
+{
+    "sid" : "target schedule sid which will be deleted",
+    # below this is used to change schedule
+    "start_date" : "start_date",
+    "start_time" : "start_time",
+    "username" : "username",
+    "groupname" : "groupname",
+    "description" : "description",
+    "duration" : ""
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 변경된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 
-
-
-
-
-
-
-
-
-
+## 스케쥴 정보 /schedule [DELETE]
+```json
+====input====
+{
+    "sid":"sid"
+}
+```
+#### Ressponse status 200
+성공적으로 스케쥴이 삭제된 경우
+```json
+====output====
+{
+    "message": "Message"
+}
+```
 

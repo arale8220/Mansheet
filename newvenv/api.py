@@ -416,9 +416,12 @@ class SCHEDULE(Resource):
             cursor = conn.cursor()
             cursor.execute("""select gid from MGROUP where Gname = '""" + _Gname + """';""" ) 
             fetchGid = cursor.fetchone()
-            if (fetchGid[0]):
+            if fetchGid and fetchGid[0]:
                 sql = """INSERT INTO SCHEDULE(Start_date,start_time,Uname,duration, Gid, description) 
                     VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
+            else :
+                res = {'message': "No such group exists"}
+                return Response(str(res).replace("'", "\""), status=201, mimetype='application/json')
             cursor.execute(sql)
             conn.commit()
 
@@ -471,7 +474,6 @@ class SCHEDULE(Resource):
             sql = """INSERT INTO SCHEDULE(Start_date,start_time,Uname,duration, Gid, description) 
                     VALUES ( '""" + _startDate + """' , '""" + _startTime + """','""" + _Uname + """','""" + str(_Duration) + """', '""" + str(fetchGid[0]) + """', '""" + _Description + """');"""
             cursor.execute(sql)
-
 
             conn.commit()
             res = {'message': "schedule changed successfully."}
