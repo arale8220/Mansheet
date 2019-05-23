@@ -232,11 +232,14 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 	"groupname" : "그룹 이름",
 	"schedules" : [
         {
-            "Start_date": "2019-05-20",
-            "Start_time": "20:00",
-            "Description": "안녕",
-            "Uname": "00hi",
-            "Gid": 1
+        	"sid" : 00
+            "start_date": "2019-05-20",
+            "start_time": "20:00",
+            "duration" : 00,
+            "description": "안녕",
+            "username": "00hi",
+            "groupid": 00,
+            "groupname" : "test"
         },
         ,,,
     ],

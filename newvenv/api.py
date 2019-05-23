@@ -219,10 +219,12 @@ class GROUP(Resource):
                 condition_str += add_str + _Uname + "'"
                 sql = "SELECT * FROM SCHEDULE WHERE " + condition_str + ";"
                 cursor.execute(sql)
-                row_headers=[x[0] for x in cursor.description]
+                row_headers=['sid', 'start_date', 'start_time', 'duration', 'description', 'username', 'groupid']
                 schedules = cursor.fetchall()
                 for one in schedules:
-                    json_schedules.append(dict(zip(row_headers,one)))
+                    cursor.execute("SELECT Gname FROM MGOUP WHERE Gid = " + one[6] + ";")
+                    tempGname = cursor.fetchone()[0]
+                    json_schedules.append(dict(zip(row_headers,one)).append('groupname', tempGname))
 
                 res = {'message': "Group created successfully.", \
                         'ownername':_Uname, 'groupname':_Gname, 'groupid' : result[1], \
@@ -318,12 +320,14 @@ class GROUP(Resource):
             #이미 있는 유저의 그룹인지 확인
             conn = mysql.connect()
             cursor = conn.cursor()
-            sql = """select * from MGROUP where Owner_uname = '""" + _Uname + """' AND Gname = '"""+ _Gname +"""' ;"""
+            sql = """select * from MGROUP where Gname = '"""+ _Gname +"""' ;"""
             cursor.execute(sql)
             existing = cursor.fetchone()
 
             if (existing is None): #존재하지 않는 아이디인 경우
                 return bad406Response("Group of that name does not exists")
+            if (_Uname == ): #그룹의 오너와 다른 아이디인 경우
+                return bad406Response("You are not the TOP of this group")
                 
             #그룹 삭제 프로시져 실행
             args = [existing[0], 0]
@@ -429,22 +433,24 @@ class SCHEDULE(Resource):
     #create 후 sid 만들기   
     def post(self):
          # POST = 1
-         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('start_date', type=str)
-            parser.add_argument('start_time', type=str)
-            parser.add_argument('username', type=str)
-            parser.add_argument('groupname',type=str)
-            parser.add_argument('description', type=str)
-            parser.add_argument('duration', type=str)
-            args = parser.parse_args()
 
-            _startDate = args['start_date']
-            _startTime = args['start_time']
-            _Gname = args['groupname']
-            _Uname = args['username']
-            _Description = args['description'] or ''
-            _Duration = args['duration']
+        parser = reqparse.RequestParser()
+        parser.add_argument('start_date', type=str)
+        parser.add_argument('start_time', type=str)
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname',type=str)
+        parser.add_argument('description', type=str)
+        parser.add_argument('duration', type=str)
+        args = parser.parse_args()
+
+        _startDate = args['start_date']
+        _startTime = args['start_time']
+        _Gname = args['groupname']
+        _Uname = args['username']
+        _Description = args['description'] or ''
+        _Duration = args['duration']
+
+         try:
 
             #StartTime 길이 확인
             if (len(_startDate)<1) or (len(_startDate)>10):
