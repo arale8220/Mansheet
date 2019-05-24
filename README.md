@@ -449,3 +449,77 @@ username의 제일 앞 두 글자가 정수가 아닌 경우<br/>
 
 
 
+
+
+<br/>
+<br/>
+
+## 그룹 가입 / join [POST] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름",
+	"username" : "현재 로그인된 유저 이름"
+}
+```
+#### Ressponse status 406
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+존재하지 않는 이름의 그룹인 경우<br/>
+다른 유저의 디폴트 그룹(개인 일정)에 출입가하려 시도하는 경우 <br/>
+
+
+#### Ressponse status 200
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+
+
+
+<br/>
+<br/>
+
+## 탑의 엔트리 변경 / join [PATCH] 
+```json
+====input====
+{
+	"groupname" : "그룹 이름",
+	"username" : "현재 로그인된 유저 이름",
+	"entries" : [
+	    	{
+	    		"username" : "탑을 제외한 엔트리의 아이디"
+	    	},
+	    	,,,
+	    ]
+}
+```
+#### Ressponse status 406
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+groupname이나 username을 입력하지 않은 경우(entries는 비어있으면 자신을 제외한 모든 인트리들을 제거)<br/>
+존재하지 않는 groupname인 경우<br/>
+다른 유저의 디폴트 그룹(개인 일정)에 출입가하려 시도하는 경우 <br/>
+탑이 아닌 그룹의 엔트리를 바꾸려 시도하는 경우<br/>
+
+
+#### Ressponse status 200
+```json
+====output====
+{
+	"message" : "Message"
+}
+```
+
+
+

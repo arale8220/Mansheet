@@ -191,7 +191,7 @@ class GROUP(Resource):
         if (len(_Uname)>30):
             return bad406Response("Group name is too long")
         if (_Entries is None):
-            return bad406Response("There is no entries in json body")
+            _Entries = []
 
 
         try:
@@ -491,6 +491,11 @@ class JOIN(Resource):
         _Uname = args['username']
         _Gname = args['groupname']
 
+        if (_Uname is None) :
+            return bad406Response("Please enter the unsername")
+        if (_Gname is None) :
+            return bad406Response("Please enter the groupname")
+
         try:
             conn = mysql.connect()
             cursor = conn.cursor()
@@ -498,10 +503,61 @@ class JOIN(Resource):
             res = cursor.fetchone()
 
             if (res is None):
-                return bad406Response("The group that you can join is not exist. \nIf not, the group is defautl group of other user.")
+                return bad406Response("The group that you want join does not exist. \nIf not, the group is defautl group of other user.")
 
             _Gid = res[0]
-            cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + _Uname + "', " + _Gid + ");" ) 
+            cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + _Uname + "', " + str(_Gid) + ");" ) 
+            conn.commit()
+            return Response(str({'message' : "User joined into group successfully."}).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname', type=str)
+        parser.add_argument('entries', action='append')
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Gname = args['groupname']
+        _Entries = args['entries']
+
+        if (_Entries is None):
+            _Entries = []
+        if (_Uname is None) :
+            return bad406Response("Please enter the unsername")
+        if (_Gname is None) :
+            return bad406Response("Please enter the groupname")
+
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("SELECT Gid, Owner_uname from MGROUP where Gname='" + _Gname + "' and Default_group='N' ;" ) 
+            res = cursor.fetchone()
+
+            if (res is None):
+                return bad406Response("The group that you want join does not exist. \nIf not, the group is default group of other user.")
+            if (res[1] != _Uname):
+                return bad406Response("You are not the top of Group")
+
+            _Gid = res[0]
+            cursor.execute("DELETE FROM PARTICIPATE WHERE Uname<>'" + _Uname + "' and Gid=" + str(_Gid) + ";" ) 
+            conn.commit()
+
+            _Entries_return = []
+            for i in _Entries:
+                i=json.loads(i.replace("'", "\""))
+                _Entries_return.append(i)
+                cursor.execute("INSERT INTO PARTICIPATE VALUES ('" + i['username']+"""', """ + str(_Gid) + """);""")
+                conn.commit()
+
             return Response(str({'message' : "User joined into group successfully."}).replace("'", "\""), status=200, mimetype='application/json')
 
         except Exception as e:
@@ -535,12 +591,12 @@ class SCHEDULE(Resource):
         _Description = args['description'] or ''
         _Duration = args['duration']
 
-        try:
+        #StartTime 길이 확인
+        if (len(_startDate)<1) or (len(_startDate)>10):
+            res = {'message': "Start date is too short or too long"}
+            return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
 
-            #StartTime 길이 확인
-            if (len(_startDate)<1) or (len(_startDate)>10):
-                res = {'message': "Start date is too short or too long"}
-                return Response(str(res).replace("'", "\""), status=406, mimetype='application/json')
+        try:
 
             #그룹 추가
             conn = mysql.connect()
