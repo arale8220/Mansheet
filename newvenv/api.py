@@ -712,14 +712,50 @@ class SCHEDULE(Resource):
         finally:
             cursor.close()
             conn.close()
+
+
+class ALLSCHEDULE(Resource):
+
+    def patch(self):
+
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT Gid from MGROUP where Default_group='N';" ) 
+            rv = cursor.fetchall()
+            _Schedules = []
+            for i in rv:
+                sql = "SELECT * FROM SCHEDULE WHERE Gid=" + str(i[0]) + ";"
+                cursor.execute(sql)
+                row_headers=('sid', 'start_date', 'start_time', 'duration', 'description', 'username', 'groupid')
+                schedules = cursor.fetchall()
+                for one in schedules:
+                    cursor.execute("SELECT Gname FROM MGROUP WHERE Gid = " + str(one[6]) + ";")
+                    tempGname = cursor.fetchone()[0]
+                    tempJson = dict(zip(row_headers,one))
+                    tempJson.update({'groupname': tempGname})
+                    _Schedules.append(tempJson)
+
+            return Response(str(_Schedules).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
         
 
 api.add_resource(USER, '/user')
 api.add_resource(GROUP, '/group')
 api.add_resource(ALLUSER, '/allusers')
 api.add_resource(ALLGROUOP, '/allgroups')
+api.add_resource(ALLSCHEDULE, '/allschedules')
 api.add_resource(SCHEDULE, '/schedule')
 api.add_resource(JOIN, '/join')
+
 
 
 def bad406Response(msg):
