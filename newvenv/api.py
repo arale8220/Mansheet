@@ -20,7 +20,7 @@ mysql.init_app(app)
 
 
 class USER(Resource):
-
+    @cross_origin()
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -71,7 +71,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
 
 
-
+    @cross_origin()
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -114,7 +114,7 @@ class USER(Resource):
 
         return error400Response("Check the json data you send.")
     
-
+    @cross_origin()
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -173,7 +173,7 @@ class USER(Resource):
         return error400Response("Check the json data you send.")
 
 class GROUP(Resource):
-
+    @cross_origin()
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -247,7 +247,7 @@ class GROUP(Resource):
 
         return error400Response("Check the json data you send.")
 
-
+    @cross_origin()
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('groupname', type=str)
@@ -312,8 +312,8 @@ class GROUP(Resource):
 
         return error400Response("Check the json data you send.")
 
-
-    def delete(self):
+    @cross_origin()
+    def put(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
         parser.add_argument('groupname', type=str)
@@ -340,8 +340,8 @@ class GROUP(Resource):
             #그룹 삭제 프로시져 실행
             _Gid = existing[0]
             args = [_Gid, 0]
-            cursor.callproc('deleteMuser', args)
-            cursor.execute('SELECT @_deleteMuser_1') 
+            cursor.callproc('deleteMgroup', args)
+            cursor.execute('SELECT @_deleteMgroup_1') 
             result = cursor.fetchone()
             if result[0]:
                 return Response(str({'message':"Group deleted successfully."}).replace("'", "\""), status=200, mimetype='application/json')
@@ -357,7 +357,7 @@ class GROUP(Resource):
 
 
 class ALLUSER(Resource):
-
+    @cross_origin()
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -383,7 +383,7 @@ class ALLUSER(Resource):
             conn.close()
 
 class ALLGROUOP(Resource):
-
+    @cross_origin()
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -431,7 +431,7 @@ class ALLGROUOP(Resource):
         finally:
             cursor.close()
             conn.close()
-
+    @cross_origin()
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -482,7 +482,7 @@ class ALLGROUOP(Resource):
             conn.close()
 
 class JOIN(Resource):
-
+    @cross_origin()
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -517,7 +517,7 @@ class JOIN(Resource):
             cursor.close()
             conn.close()
 
-
+    @cross_origin()
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str)
@@ -567,11 +567,50 @@ class JOIN(Resource):
             cursor.close()
             conn.close()
 
+    @cross_origin()
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('groupname', type=str)
+        args = parser.parse_args()
+
+        _Uname = args['username']
+        _Gname = args['groupname']
+
+        if (_Uname is None) :
+            return bad406Response("Please enter the unsername")
+        if (_Gname is None) :
+            return bad406Response("Please enter the groupname")
+
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.execute("SELECT Gid, Owner_uname from MGROUP where Gname='" + _Gname + "' and Default_group='N' ;" ) 
+            res = cursor.fetchone()
+
+            if (res is None):
+                return bad406Response("The group does not exist.")
+
+            _Gid = res[0]
+            if (_Uname == res[1]):
+                return bad406Response("Group owner cannot be deleted from the group.")
+
+            cursor.execute("DELETE FROM PARTICIPATE WHERE Uname='" + _Uname + "' and Gid=" + str(_Gid) + ";" ) 
+            conn.commit()
+            return Response(str({'message' : "User deleted from group successfully."}).replace("'", "\""), status=200, mimetype='application/json')
+
+        except Exception as e:
+            return error400Response(str(e))
+        
+        finally:
+            cursor.close()
+            conn.close()
+
 
 class SCHEDULE(Resource):
     #post -> 데이터 만들기
     #create 후 sid 만들기   
-
+    @cross_origin()
     def post(self):
          # POST = 1
 
@@ -624,7 +663,7 @@ class SCHEDULE(Resource):
             conn.close()
 
     #update 시간표. Description 바꾸기
-
+    @cross_origin()
     def patch(self):
 
         #과연 다른 정보들이 필요한가? Sid만 주면 안되남
@@ -678,7 +717,7 @@ class SCHEDULE(Resource):
             conn.close()
 
     # 데이터 지우기
-
+    @cross_origin()
     def delete(self):
         #과연 다른 정보들이 필요한가? Sid만 주면 안되남
         parser = reqparse.RequestParser()
@@ -715,7 +754,7 @@ class SCHEDULE(Resource):
 
 
 class ALLSCHEDULE(Resource):
-
+    @cross_origin()
     def patch(self):
 
         try:
